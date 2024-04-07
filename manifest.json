@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "Simple Chrome Extension",
+  "version": "1.0",
+  "description": "A simple Chrome Extension example",
+  "permissions": ["activeTab", "contextMenus", "tabs", "scripting"],
+  "action": {
+    "default_popup": "build/popup/index.html",
+    "default_icon": {
+      "128": "src/public/icons/icon128.png"
+    }
+  },
+  "host_permissions": ["*://*/"],
+  "options_page": "build/options/index.html",
+  "background": {
+    "service_worker": "build/background/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["build/content/content.js"]
+    }
+  ]
+}

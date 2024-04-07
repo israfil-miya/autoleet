@@ -1,0 +1,23 @@
+{
+  "name": "extension",
+  "version": "1.0.0",
+  "description": "",
+  "main": "background.js",
+  "scripts": {
+    "build": "node build.js",
+    "start": "nodemon --watch src --ext js,mjs,cjs,json,css,html --exec \"node build.js\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "fs-extra": "^11.2.0",
+    "highlight.js": "^11.9.0",
+    "js-beautify": "^1.15.1",
+    "underscore": "^1.13.6"
+  },
+  "devDependencies": {
+    "esbuild": "^0.20.2",
+    "nodemon": "^3.1.0"
+  }
+}
