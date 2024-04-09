@@ -33,6 +33,7 @@ const entryPoints = [
   { name: 'popup', entry: './src/popup/popup.js', outdir: 'popup' },
   { name: 'background', entry: './src/script/background.js', outdir: 'background' },
   { name: 'lang-detector', entry: './src/script/lang-detector.js', outdir: 'background' },
+  { name: 'base64', entry: './src/script/base64.js', outdir: 'background' },
   { name: 'content', entry: './src/content/content.js', outdir: 'content' },
   { name: 'options', entry: './src/options/options.js', outdir: 'options' }
 ];

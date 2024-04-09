@@ -1,6 +1,7 @@
 import jsBeautify from "js-beautify";
 import detectLang from "./lang-detector";
 import hljs from "highlight.js";
+import { encode } from "./base64";
 
 function generateHighlightedPreTag(codeSnippet, lang) {
   const highlightedCode = hljs.highlight(codeSnippet, { language: lang }).value;
@@ -24,16 +25,23 @@ async function injectHtmlifiedCode(targetHtmlQuery, targetTabId, information) {
       func: (query, info) => {
         console.log(query, info);
 
-        const editorDiv = document.querySelector(query.codeSnippet);
+        // const editorDiv = document.querySelector(query.codeSnippet);
 
-        if (editorDiv) {
-          editorDiv.innerHTML = info.htmlify_code;
-        } else {
-          console.error(`Target not found: ${query.codeSnippet}`);
-        }
+        // if (editorDiv) {
+        //   editorDiv.innerHTML = info.htmlify_code;
+        // } else {
+        //   console.error(`Target not found: ${query.codeSnippet}`);
+        // }
+
+        // const textareaCode = document.querySelector(query.textarea);
+
+        // if (textareaCode) {
+        //   textareaCode.innerHTML = info.code; // Title left blank for aesthetic but can be any text, preferred: problem name
+        // } else {
+        //   console.error(`Target not found: ${query.textarea}`);
+        // }
 
         const titleSpan = document.querySelector(query.title);
-
         if (titleSpan) {
           titleSpan.innerHTML = ""; // Title left blank for aesthetic but can be any text, preferred: problem name
         } else {
@@ -41,14 +49,24 @@ async function injectHtmlifiedCode(targetHtmlQuery, targetTabId, information) {
         }
 
         const backgroundContainer = document.querySelector(query.background);
-
         if (backgroundContainer) {
           backgroundContainer.style.backgroundImage = `linear-gradient(140deg, rgb(165, 176, 188), rgb(169, 181, 193))`;
         } else {
           console.error(`Target not found: ${query.background}`);
         }
 
-        console.log("Script Executed");
+        const headerButtons = document.querySelectorAll(query.headerButtons);
+        if (headerButtons.length) {
+          const colors = ["#ff644e", "#ffbf29", "#27ca36"];
+
+          headerButtons.forEach((child, index) => {
+            child.style.backgroundColor = colors[index % colors.length];
+          });
+        } else {
+          console.error(`Target not found: ${query.background}`);
+        }
+
+        console.log("All Script Executed");
       },
       args: [targetHtmlQuery, information], // Pass query and code as arguments
     });
@@ -57,16 +75,18 @@ async function injectHtmlifiedCode(targetHtmlQuery, targetTabId, information) {
   }
 }
 
-function generateCodeImage(information) {
-  return new Promise((resolve, reject) => {
+function generateCodeImage(information, encodedCode) {
+  return new Promise(async (resolve, reject) => {
+    /*
     const targetUrl = "https://ray.so/";
 
     chrome.tabs.query({ url: targetUrl.split("#")[0] + "*" }, async (tabs) => {
+
       let targetTabId;
 
       if (tabs.length === 0) {
-        // No open tabs with the base URL, create a new tab and get its ID
-        targetTabId = (await chrome.tabs.create({ url: targetUrl })).id;
+        // No open tabs with the base URL, create a new tab in the background
+        targetTabId = (await chrome.tabs.create({ url: targetUrl, active: false })).id; // Pass 'active: false'
       } else {
         // At least one tab with the base URL is open
         for (const tab of tabs) {
@@ -75,12 +95,15 @@ function generateCodeImage(information) {
             break;
           }
         }
-
-        // If no matching tab found, create a new tab and get its ID
+    
+        // If no matching tab found, create a new tab in the background
         if (!targetTabId) {
-          targetTabId = (await chrome.tabs.create({ url: targetUrl })).id;
+          targetTabId = (await chrome.tabs.create({ url: targetUrl, active: false })).id; // Pass 'active: false'
         }
       }
+
+
+
 
       if (targetTabId) {
         await injectHtmlifiedCode(
@@ -89,6 +112,8 @@ function generateCodeImage(information) {
             title:
               'div.Frame_fileName__zfOJA span[data-ignore-in-export="true"]',
             background: "div.Frame_frame__CAiHj",
+            textarea: "textarea.Editor_textarea__OxM_Z",
+            headerButtons: 'div.Frame_controls__xPHKk div.Frame_control__WM3BS'
           },
           targetTabId,
           information
@@ -100,7 +125,32 @@ function generateCodeImage(information) {
           new Error("Failed to obtain a valid tab ID for script injection")
         );
       }
+
     });
+    */
+
+    let openTabUrl = "https://ray.so/#code=" + encodedCode;
+    let targetTabId = (
+      await chrome.tabs.create({ url: openTabUrl, active: false })
+    ).id;
+
+    if (targetTabId) {
+      await injectHtmlifiedCode(
+        {
+          codeSnippet: "pre.Editor_formatted__x4nkp.hljs",
+          title: 'div.Frame_fileName__zfOJA span[data-ignore-in-export="true"]',
+          background: "div.Frame_frame__CAiHj",
+          textarea: "textarea.Editor_textarea__OxM_Z",
+          headerButtons: "div.Frame_controls__xPHKk div.Frame_control__WM3BS",
+        },
+        targetTabId,
+        information
+      );
+
+      resolve(targetTabId); // Resolve with the targetTabId
+    } else {
+      reject(new Error("Failed to obtain a valid tab ID for script injection"));
+    }
   });
 }
 
@@ -215,12 +265,18 @@ chrome.contextMenus.onClicked.addListener(async (info, _) => {
 
   information.language = detectLang(information.code);
 
-  information.htmlify_code = generateHighlightedPreTag(
-    information.code,
-    information.language
+  // information.htmlify_code = generateHighlightedPreTag(
+  //   information.code,
+  //   information.language
+  // );
+
+  let ray_so_tabId = await generateCodeImage(
+    information,
+    encode(information.code)
   );
 
-  let ray_so_tabId = await generateCodeImage(information);
-
   console.log(ray_so_tabId);
+
+  // console.log(encode(information.code));
+  // console.log(info);
 });
