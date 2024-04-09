@@ -14,6 +14,10 @@ fs.copySync('./src/options/index.html', './build/options/index.html');
 fs.copySync('./src/options/style.css', './build/options/style.css');
 
 
+
+fs.copySync('./src/content/style.css', './build/content/style.css');
+
+
 // Bootstrap
 fs.copySync('./src/public/bootstrap/bootstrap.bundle.min.js', './build/public/bootstrap/bootstrap.bundle.min.js');
 fs.copySync('./src/public/bootstrap/bootstrap.min.css', './build/public/bootstrap/bootstrap.min.css');

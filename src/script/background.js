@@ -1,21 +1,7 @@
 import jsBeautify from "js-beautify";
 import detectLang from "./lang-detector";
-import hljs from "highlight.js";
 import { encode } from "./base64";
 
-function generateHighlightedPreTag(codeSnippet, lang) {
-  const highlightedCode = hljs.highlight(codeSnippet, { language: lang }).value;
-
-  // const preTag = document.createElement('pre');
-  // preTag.classList.add("Editor_formatted__x4nkp", "hljs");
-  // preTag.textContent = highlightedCode;
-
-  // const preTagHtml = preTag.outerHTML;
-
-  // return preTagHtml
-
-  return highlightedCode;
-}
 
 async function injectHtmlifiedCode(targetHtmlQuery, targetTabId, information) {
   try {
@@ -24,22 +10,6 @@ async function injectHtmlifiedCode(targetHtmlQuery, targetTabId, information) {
 
       func: (query, info) => {
         console.log(query, info);
-
-        // const editorDiv = document.querySelector(query.codeSnippet);
-
-        // if (editorDiv) {
-        //   editorDiv.innerHTML = info.htmlify_code;
-        // } else {
-        //   console.error(`Target not found: ${query.codeSnippet}`);
-        // }
-
-        // const textareaCode = document.querySelector(query.textarea);
-
-        // if (textareaCode) {
-        //   textareaCode.innerHTML = info.code; // Title left blank for aesthetic but can be any text, preferred: problem name
-        // } else {
-        //   console.error(`Target not found: ${query.textarea}`);
-        // }
 
         const titleSpan = document.querySelector(query.title);
         if (titleSpan) {
@@ -66,6 +36,15 @@ async function injectHtmlifiedCode(targetHtmlQuery, targetTabId, information) {
           console.error(`Target not found: ${query.background}`);
         }
 
+
+        const exportButton = document.querySelector(query.exportButton);
+        if (exportButton) {
+          exportButton.click();
+        } else {
+          console.error(`Target not found: ${query.exportButton}`);
+        }
+
+
         console.log("All Script Executed");
       },
       args: [targetHtmlQuery, information], // Pass query and code as arguments
@@ -77,58 +56,6 @@ async function injectHtmlifiedCode(targetHtmlQuery, targetTabId, information) {
 
 function generateCodeImage(information, encodedCode) {
   return new Promise(async (resolve, reject) => {
-    /*
-    const targetUrl = "https://ray.so/";
-
-    chrome.tabs.query({ url: targetUrl.split("#")[0] + "*" }, async (tabs) => {
-
-      let targetTabId;
-
-      if (tabs.length === 0) {
-        // No open tabs with the base URL, create a new tab in the background
-        targetTabId = (await chrome.tabs.create({ url: targetUrl, active: false })).id; // Pass 'active: false'
-      } else {
-        // At least one tab with the base URL is open
-        for (const tab of tabs) {
-          if (tab.url.startsWith(targetUrl)) {
-            targetTabId = tab.id;
-            break;
-          }
-        }
-    
-        // If no matching tab found, create a new tab in the background
-        if (!targetTabId) {
-          targetTabId = (await chrome.tabs.create({ url: targetUrl, active: false })).id; // Pass 'active: false'
-        }
-      }
-
-
-
-
-      if (targetTabId) {
-        await injectHtmlifiedCode(
-          {
-            codeSnippet: "pre.Editor_formatted__x4nkp.hljs",
-            title:
-              'div.Frame_fileName__zfOJA span[data-ignore-in-export="true"]',
-            background: "div.Frame_frame__CAiHj",
-            textarea: "textarea.Editor_textarea__OxM_Z",
-            headerButtons: 'div.Frame_controls__xPHKk div.Frame_control__WM3BS'
-          },
-          targetTabId,
-          information
-        );
-
-        resolve(targetTabId); // Resolve with the targetTabId
-      } else {
-        reject(
-          new Error("Failed to obtain a valid tab ID for script injection")
-        );
-      }
-
-    });
-    */
-
     let openTabUrl = "https://ray.so/#code=" + encodedCode;
     let targetTabId = (
       await chrome.tabs.create({ url: openTabUrl, active: false })
@@ -137,11 +64,10 @@ function generateCodeImage(information, encodedCode) {
     if (targetTabId) {
       await injectHtmlifiedCode(
         {
-          codeSnippet: "pre.Editor_formatted__x4nkp.hljs",
           title: 'div.Frame_fileName__zfOJA span[data-ignore-in-export="true"]',
           background: "div.Frame_frame__CAiHj",
-          textarea: "textarea.Editor_textarea__OxM_Z",
           headerButtons: "div.Frame_controls__xPHKk div.Frame_control__WM3BS",
+          exportButton: "button.ExportButton_button__MA4PI"
         },
         targetTabId,
         information
@@ -240,8 +166,8 @@ function getTodaysDate() {
 }
 
 let information = {
-  problem_name: "Unknown",
-  code: `Unknown`,
+  problem_name: "",
+  code: ``,
   todays_date: getTodaysDate(),
   language: "",
   htmlify_code: "",
@@ -253,30 +179,46 @@ chrome.contextMenus.create({
   id: "share_menu_item",
 });
 
-chrome.contextMenus.onClicked.addListener(async (info, _) => {
-  information.code = jsBeautify(info.selectionText);
+chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
-  let title_end_index = info.pageUrl.indexOf("/", 31);
-  let title_start_index = info.pageUrl.indexOf("/", 25);
 
-  information.problem_name = formatText(
-    info.pageUrl.substring(title_start_index + 1, title_end_index)
-  );
+  console.log(info, tab)
 
-  information.language = detectLang(information.code);
 
-  // information.htmlify_code = generateHighlightedPreTag(
-  //   information.code,
-  //   information.language
-  // );
 
-  let ray_so_tabId = await generateCodeImage(
-    information,
-    encode(information.code)
-  );
+  if (info.menuItemId === "share_menu_item") {
 
-  console.log(ray_so_tabId);
 
-  // console.log(encode(information.code));
-  // console.log(info);
+
+
+
+    information.code = jsBeautify(info.selectionText);
+
+    let title_end_index = info.pageUrl.indexOf("/", 31);
+    let title_start_index = info.pageUrl.indexOf("/", 25);
+  
+    information.problem_name = formatText(
+      info.pageUrl.substring(title_start_index + 1, title_end_index)
+    );
+  
+    information.language = detectLang(information.code);
+  
+    let ray_so_tabId = await generateCodeImage(
+      information,
+      encode(information.code)
+    );
+
+
+
+
+
+
+
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+      console.log("This Executed")
+      chrome.tabs.sendMessage(tabs[0].id, { message: "myMessage" });
+    });
+
+
+  }
 });
