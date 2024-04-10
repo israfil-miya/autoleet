@@ -216,7 +216,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
     chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       console.log("This Executed")
-      chrome.tabs.sendMessage(tabs[0].id, { message: "myMessage" });
+      chrome.tabs.sendMessage(tabs[0].id, { data: information, message: "openConfirmationPopup" });
     });
 
 

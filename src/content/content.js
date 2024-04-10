@@ -1,25 +1,22 @@
 chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-    if (message.message === "myMessage") {
-        console.log("recieved message");
-        openCustomPopup()
+    if (message.message === "openConfirmationPopup") {
+        console.log(message.data);
+        openCustomPopup(message.data)
     }
 });
 
 
 // Function to open the custom popup
-function openCustomPopup() {
+function openCustomPopup(data) {
     // Create your custom popup (HTML, CSS, JavaScript)
     const popupDiv = document.createElement("div");
     popupDiv.id = "customPopup";
     popupDiv.innerHTML = `
-      <div>
+      <div class="popup-container">
         <h3>Custom Popup</h3>
         <form id="customForm">
-          <label for="input1">Input 1:</label>
-          <input type="text" id="input1" name="input1">
-          <br><br>
-          <label for="input2">Input 2:</label>
-          <input type="text" id="input2" name="input2">
+          <label for="input1">Parsed Code</label>
+          <textarea id="codeTextArea">${data.code}</textarea>
           <br><br>
           <button type="submit">Submit</button>
           <button type="button" id="cancelButton">Cancel</button>
