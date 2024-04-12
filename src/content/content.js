@@ -1,59 +1,81 @@
-chrome.runtime.onMessage.addListener(function (message, sender, sendResponse) {
-    if (message.message === "openConfirmationPopup") {
-        console.log(message.data);
-        openCustomPopup(message.data)
-    }
+chrome.runtime.onMessage.addListener((message, _, __) => {
+  if (message.action === "openCustomPopup") {
+    openCustomPopup(message.data);
+  } else if (message.action === "getSelectedText") {
+    let selectedText = handleParseSelectedText();
+    chrome.runtime.sendMessage({ action: "selectedText", selectedText });
+  }
 });
 
+const handleParseSelectedText = () => {
+  const selection = window.getSelection();
+  if (selection.rangeCount > 0) {
+    const selectedText = selection.toString();
+    return selectedText;
+  } else {
+    return "Unable to parse";
+  }
+};
 
-// Function to open the custom popup
 function openCustomPopup(data) {
-    // Create your custom popup (HTML, CSS, JavaScript)
-    const popupDiv = document.createElement("div");
-    popupDiv.id = "customPopup";
-    popupDiv.innerHTML = `
-      <div class="popup-container">
-        <h3>Custom Popup</h3>
-        <form id="customForm">
-          <label for="input1">Parsed Code</label>
-          <textarea id="codeTextArea">${data.code}</textarea>
-          <br><br>
-          <button type="submit">Submit</button>
-          <button type="button" id="cancelButton">Cancel</button>
-        </form>
-      </div>
-    `;
+  const popupDiv = document.createElement("div");
+  popupDiv.id = "customPopup";
+  popupDiv.classList.add("popup-overlay");
+  popupDiv.innerHTML = `
+    <div class="popup-container">
+      <button class="cancel-button" id="cancelButton">Close</button>
+      <h3 id="heading">AUTOLEET</h3>
+      <form id="customForm">
+        <label for="codeTextArea">Parsed Code:</label>
+        <textarea id="codeTextArea" name="code" placeholder="Enter code here...">${data.code}</textarea>
+        <label for="languageInput">Language:</label>
+        <input type="text" id="languageInput" name="language" placeholder="Enter language..." value="${data.language}">
+        <label for="titleInput">Title:</label>
+        <input type="text" id="titleInput" name="title" placeholder="Enter title..." value="${data.problem_name}">
+        <label for="spaceInput">Space Complexity:</label>
+        <input type="text" id="spaceInput" name="space" placeholder="Enter space complexity...">
+        <label for="timeInput">Time Complexity:</label>
+        <input type="text" id="timeInput" name="time" placeholder="Enter time complexity...">
+        <br><br>
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+  `;
 
-    // Append the popup to the body
-    document.body.appendChild(popupDiv);
+  document.body.appendChild(popupDiv);
 
-    // Add event listener for form submission
-    const form = document.getElementById("customForm");
-    form.addEventListener("submit", handleSubmit);
+  const form = document.getElementById("customForm");
+  form.addEventListener("submit", handleSubmit);
 
-    // Add event listener for cancel button click
-    const cancelButton = document.getElementById("cancelButton");
-    cancelButton.addEventListener("click", closeCustomPopup);
+  const cancelButton = document.getElementById("cancelButton");
+  cancelButton.addEventListener("click", closeCustomPopup);
 }
 
-// Function to handle form submission
 function handleSubmit(event) {
-    event.preventDefault();
-    const input1Value = document.getElementById("input1").value;
-    const input2Value = document.getElementById("input2").value;
+  event.preventDefault();
+  const input1Value = document.getElementById("languageInput").value;
+  const input2Value = document.getElementById("titleInput").value;
+  const input3Value = document.getElementById("spaceInput").value;
+  const input4Value = document.getElementById("timeInput").value;
+  const input5Value = document.getElementById("codeTextArea").value;
 
-    // Perform actions with form values (send to background script, etc.)
-    console.log("Input 1:", input1Value);
-    console.log("Input 2:", input2Value);
+  chrome.runtime.sendMessage({
+    action: "processedData",
+    data: {
+      language: input1Value,
+      title: input2Value,
+      complexity_space: input3Value,
+      complexity_time: input4Value,
+      code: input5Value,
+    },
+  });
 
-    // Close the custom popup
-    closeCustomPopup();
+  closeCustomPopup();
 }
 
-// Function to close the custom popup
 function closeCustomPopup() {
-    const popupDiv = document.getElementById("customPopup");
-    if (popupDiv) {
-        popupDiv.remove();
-    }
+  const popupDiv = document.getElementById("customPopup");
+  if (popupDiv) {
+    popupDiv.remove();
+  }
 }

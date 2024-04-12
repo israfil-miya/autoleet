@@ -2,8 +2,7 @@ import jsBeautify from "js-beautify";
 import detectLang from "./lang-detector";
 import { encode } from "./base64";
 
-
-async function injectHtmlifiedCode(targetHtmlQuery, targetTabId, information) {
+async function injectHtmlCode(targetHtmlQuery, targetTabId, data) {
   try {
     await chrome.scripting.executeScript({
       target: { tabId: targetTabId },
@@ -36,7 +35,6 @@ async function injectHtmlifiedCode(targetHtmlQuery, targetTabId, information) {
           console.error(`Target not found: ${query.background}`);
         }
 
-
         const exportButton = document.querySelector(query.exportButton);
         if (exportButton) {
           exportButton.click();
@@ -44,17 +42,16 @@ async function injectHtmlifiedCode(targetHtmlQuery, targetTabId, information) {
           console.error(`Target not found: ${query.exportButton}`);
         }
 
-
         console.log("All Script Executed");
       },
-      args: [targetHtmlQuery, information], // Pass query and code as arguments
+      args: [targetHtmlQuery, data], // Pass query and code as arguments
     });
   } catch (error) {
     console.error("Error injecting code:", error);
   }
 }
 
-function generateCodeImage(information, encodedCode) {
+function generateCodeImage(data, encodedCode) {
   return new Promise(async (resolve, reject) => {
     let openTabUrl = "https://ray.so/#code=" + encodedCode;
     let targetTabId = (
@@ -62,18 +59,18 @@ function generateCodeImage(information, encodedCode) {
     ).id;
 
     if (targetTabId) {
-      await injectHtmlifiedCode(
+      await injectHtmlCode(
         {
           title: 'div.Frame_fileName__zfOJA span[data-ignore-in-export="true"]',
           background: "div.Frame_frame__CAiHj",
           headerButtons: "div.Frame_controls__xPHKk div.Frame_control__WM3BS",
-          exportButton: "button.ExportButton_button__MA4PI"
+          exportButton: "button.ExportButton_button__MA4PI",
         },
         targetTabId,
-        information
+        data
       );
 
-      resolve(targetTabId); // Resolve with the targetTabId
+      resolve(targetTabId);
     } else {
       reject(new Error("Failed to obtain a valid tab ID for script injection"));
     }
@@ -165,12 +162,35 @@ function getTodaysDate() {
   return formattedDate;
 }
 
-let information = {
-  problem_name: "",
-  code: ``,
-  todays_date: getTodaysDate(),
-  language: "",
-  htmlify_code: "",
+const handleSelectedText = (message, info, tab) => {
+  let parsed_code = message.selectedText;
+
+  let title_end_index = info.pageUrl.indexOf("/", 31);
+  let title_start_index = info.pageUrl.indexOf("/", 25);
+
+  let problem_name = formatText(
+    info.pageUrl.substring(title_start_index + 1, title_end_index)
+  );
+
+  let detected_language = detectLang(parsed_code);
+
+  chrome.tabs.sendMessage(tab.id, {
+    action: "openCustomPopup",
+    data: {
+      language: detected_language,
+      problem_name,
+      code: parsed_code,
+    },
+  });
+};
+const handleProcessedData = async (message, info, tab) => {
+  let data = { ...message.data, date: getTodaysDate() };
+
+  console.log(data);
+
+  let ray_so_tabId = await generateCodeImage(data, encode(data.code));
+
+  console.log(ray_so_tabId);
 };
 
 chrome.contextMenus.create({
@@ -180,45 +200,17 @@ chrome.contextMenus.create({
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-
-
-  console.log(info, tab)
-
-
+  // console.log(info, tab);
 
   if (info.menuItemId === "share_menu_item") {
+    chrome.tabs.sendMessage(tab.id, { action: "getSelectedText" });
 
-
-
-
-
-    information.code = jsBeautify(info.selectionText);
-
-    let title_end_index = info.pageUrl.indexOf("/", 31);
-    let title_start_index = info.pageUrl.indexOf("/", 25);
-  
-    information.problem_name = formatText(
-      info.pageUrl.substring(title_start_index + 1, title_end_index)
-    );
-  
-    information.language = detectLang(information.code);
-  
-    let ray_so_tabId = await generateCodeImage(
-      information,
-      encode(information.code)
-    );
-
-
-
-
-
-
-
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      console.log("This Executed")
-      chrome.tabs.sendMessage(tabs[0].id, { data: information, message: "openConfirmationPopup" });
+    chrome.runtime.onMessage.addListener(async (message, _, __) => {
+      if (message.action === "selectedText") {
+        handleSelectedText(message, info, tab);
+      } else if (message.action === "processedData") {
+        await handleProcessedData(message, info, tab);
+      }
     });
-
-
   }
 });
