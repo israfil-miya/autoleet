@@ -4,6 +4,8 @@ chrome.runtime.onMessage.addListener((message, _, __) => {
   } else if (message.action === "getSelectedText") {
     let selectedText = handleParseSelectedText();
     chrome.runtime.sendMessage({ action: "selectedText", selectedText });
+  } else if (message.action === "generateCodeImage") {
+    generateCodeImage(message.selectors);
   }
 });
 
@@ -16,6 +18,55 @@ const handleParseSelectedText = () => {
     return "Unable to parse";
   }
 };
+
+
+
+
+
+
+const generateCodeImage = (selectors) => {
+
+  const titleSpan = document.querySelector(selectors.title);
+  if (titleSpan) {
+    titleSpan.innerHTML = ""; // Title left blank for aesthetic but can be any text, preferred: problem name
+  } else {
+    console.error(`Target not found: ${selectors.title}`);
+  }
+
+  const backgroundContainer = document.querySelector(selectors.background);
+  if (backgroundContainer) {
+    backgroundContainer.style.backgroundImage = `linear-gradient(140deg, rgb(165, 176, 188), rgb(169, 181, 193))`;
+  } else {
+    console.error(`Target not found: ${selectors.background}`);
+  }
+
+  const headerButtons = document.querySelectorAll(selectors.headerButtons);
+  if (headerButtons.length) {
+    const colors = ["#ff644e", "#ffbf29", "#27ca36"];
+
+    headerButtons.forEach((child, index) => {
+      child.style.backgroundColor = colors[index % colors.length];
+    });
+  } else {
+    console.error(`Target not found: ${selectors.background}`);
+  }
+
+  const exportButton = document.querySelector(selectors.exportButton);
+  if (exportButton) {
+    exportButton.click();
+  } else {
+    console.error(`Target not found: ${selectors.exportButton}`);
+  }
+
+  console.log("All Script Executed");
+}
+
+
+
+
+
+
+
 
 function openCustomPopup(data) {
   const popupDiv = document.createElement("div");
