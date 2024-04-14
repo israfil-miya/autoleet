@@ -2,6 +2,125 @@ import detectLang from "./lang-detector";
 import { encode } from "./base64";
 
 let ray_so_tabId;
+let facebook_tabId;
+let data = {};
+
+const facebookAutoPostScript = (query, data, imageBlob) => {
+  console.log("DATA: ", query, data, imageBlob);
+
+
+
+
+
+  function getGrandParentDivOfSpanWithText() {
+    const spans = document.querySelectorAll("span");
+  
+    for (const span of spans) {
+      const text = span.textContent.trim();
+      if (text.includes("Photo/video")) {
+        // Check if the text starts with "Photo/video"
+        if (text.indexOf("Photo/video") === 0) {
+          // Get the parent div of the parent div of this span
+          const parentDiv = span.closest("div");
+          if (parentDiv && parentDiv.parentElement) {
+            return parentDiv.parentElement;
+          }
+        }
+      }
+    }
+  
+    return null; // If not found
+  }
+  
+  function clickOnDiv(div) {
+    const clickEvent = new MouseEvent("click", {
+      view: window,
+      bubbles: true,
+      cancelable: true,
+    });
+    div.dispatchEvent(clickEvent);
+  }
+
+
+
+
+  function getDesiredElementWithAriaLabel() {
+    const elements = document.querySelectorAll('div[contenteditable="true"][role="textbox"]');
+  
+    for (const element of elements) {
+      const ariaLabel = element.getAttribute('aria-label');
+      if (ariaLabel && ariaLabel.includes("What's on your mind")) {
+        return element;
+      }
+    }
+  
+    return null; // If not found
+  }
+
+
+
+  
+  // Function to handle when the desired element is found
+  function handleDesiredElementFound(captionEl) {
+    // Your code to interact with the desired element
+    console.log("Found the desired element:", captionEl);
+    captionEl.textContent = "Hello, World!"
+  }
+  
+  // Function to create a MutationObserver
+  function observeDOMChanges() {
+    // Select the target node for the observer
+    const targetNode = document.body;
+  
+    // Options for the observer (in this case, we want to observe childList changes)
+    const config = { childList: true, subtree: true };
+  
+    // Callback function to execute when mutations are observed
+    const callback = function (mutationsList, observer) {
+      // Loop through each mutation
+      for (const mutation of mutationsList) {
+        // Check if nodes were added
+        if (mutation.type === "childList") {
+          // Check if the desired element is now available
+          const desiredElement = getDesiredElementWithAriaLabel()
+          if (desiredElement) {
+            // Disconnect the observer since we found the element
+            observer.disconnect();
+            // Call the function to handle the desired element
+            handleDesiredElementFound(desiredElement);
+            break;
+          }
+        }
+      }
+    };
+  
+    // Create an observer instance linked to the callback function
+    const observer = new MutationObserver(callback);
+  
+    // Start observing the target node for configured mutations
+    observer.observe(targetNode, config);
+  }
+  
+
+
+  
+  // Usage example
+  const grandParentDiv = getGrandParentDivOfSpanWithText();
+  if (grandParentDiv) {
+    clickOnDiv(grandParentDiv);
+    observeDOMChanges();
+  } else {
+    console.error("Grandparent div not found");
+  }
+  
+
+
+
+
+
+
+
+};
 
 const prepareCodeBlockImageScript = (query, data) => {
   const titleSpan = document.querySelector(query.title);
@@ -207,7 +326,7 @@ const handleSelectedText = (message, info, tab) => {
 };
 
 const handleProcessedData = async (message, info, tab) => {
-  let data = { ...message.data, date: getTodaysDate() };
+  data = { ...message.data, date: getTodaysDate() };
 
   await downloadCodeImage(data, encode(data.code));
 };
@@ -288,13 +407,70 @@ chrome.downloads.onChanged.addListener(async function onDownloadChanged(
 
     let imageBlob = await readLatestDownloadedFile();
     console.log("Image Blob:", imageBlob);
+    console.log("Code Data:", data);
 
+    await uploadToFacebook(data, imageBlob);
 
-
-    
     // Handle the image blob as needed
-
-
-
   }
 });
+
+function uploadToFacebook(data, imageBlob) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let tabId = await openFacebookTab();
+
+      console.log("facebook Tab ID: ", tabId);
+
+      let selectors = {
+        postBar: 'div[role="button"][tabindex="0"] > div:has(span)',
+      };
+
+      await executeScriptOnTabLoad(
+        tabId,
+        facebookAutoPostScript,
+        selectors,
+        data,
+        imageBlob
+      );
+      resolve(tabId);
+    } catch (error) {
+      console.log(error);
+      reject(error);
+    }
+  });
+}
+
+function openFacebookTab() {
+  function createNewFacebookTab(resolve, reject) {
+    chrome.tabs.create(
+      { url: "https://facebook.com", active: false },
+      (tab) => {
+        if (tab) {
+          facebook_tabId = tab.id; // Store the new tab ID
+          resolve(tab.id);
+        } else {
+          reject(new Error("Failed to create a new Facebook tab"));
+        }
+      }
+    );
+  }
+
+  return new Promise((resolve, reject) => {
+    // Check if the Facebook tab is already open
+    if (facebook_tabId) {
+      chrome.tabs.get(facebook_tabId, (tab) => {
+        if (chrome.runtime.lastError || !tab) {
+          // If tab is not found, create a new one
+          createNewFacebookTab(resolve, reject);
+        } else {
+          // If tab is found, reuse it
+          resolve(facebook_tabId);
+        }
+      });
+    } else {
+      // If tab ID is not set, create a new tab
+      createNewFacebookTab(resolve, reject);
+    }
+  });
+}
