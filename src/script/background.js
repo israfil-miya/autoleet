@@ -6,15 +6,9 @@ let facebook_tabId;
 let data = {};
 
 const facebookAutoPostScript = (query, data, imageBlob) => {
-  console.log("DATA: ", query, data, imageBlob);
-
-
-
-
-
   function getGrandParentDivOfSpanWithText() {
     const spans = document.querySelectorAll("span");
-  
+
     for (const span of spans) {
       const text = span.textContent.trim();
       if (text.includes("Photo/video")) {
@@ -28,10 +22,10 @@ const facebookAutoPostScript = (query, data, imageBlob) => {
         }
       }
     }
-  
+
     return null; // If not found
   }
-  
+
   function clickOnDiv(div) {
     const clickEvent = new MouseEvent("click", {
       view: window,
@@ -42,39 +36,52 @@ const facebookAutoPostScript = (query, data, imageBlob) => {
   }
 
 
-
+  function sendKeyPress(element, key) {
+    element.dispatchEvent(new KeyboardEvent('keydown', { key }));
+    element.dispatchEvent(new KeyboardEvent('keypress', { key }));
+    element.dispatchEvent(new KeyboardEvent('keyup', { key }));
+  }
 
   function getDesiredElementWithAriaLabel() {
-    const elements = document.querySelectorAll('div[contenteditable="true"][role="textbox"]');
-  
+    const elements = document.querySelectorAll(
+      'div[contenteditable="true"][role="textbox"]'
+    );
+
     for (const element of elements) {
-      const ariaLabel = element.getAttribute('aria-label');
+      const ariaLabel = element.getAttribute("aria-label");
       if (ariaLabel && ariaLabel.includes("What's on your mind")) {
         return element;
       }
     }
-  
+
     return null; // If not found
   }
 
-
-
-  
-  // Function to handle when the desired element is found
-  function handleDesiredElementFound(captionEl) {
+  function handleDesiredElementFound(lexicalEditor) {
     // Your code to interact with the desired element
-    console.log("Found the desired element:", captionEl);
-    captionEl.textContent = "Hello, World!"
+    console.log("Found the main editing area:", lexicalEditor);
+
+
+    sendKeyPress(lexicalEditor, 'H');
+    sendKeyPress(lexicalEditor, 'e');
+    sendKeyPress(lexicalEditor, 'l');
+    sendKeyPress(lexicalEditor, 'l');
+    sendKeyPress(lexicalEditor, 'o');
+
+
+
+
+
   }
-  
+
   // Function to create a MutationObserver
   function observeDOMChanges() {
     // Select the target node for the observer
     const targetNode = document.body;
-  
+
     // Options for the observer (in this case, we want to observe childList changes)
     const config = { childList: true, subtree: true };
-  
+
     // Callback function to execute when mutations are observed
     const callback = function (mutationsList, observer) {
       // Loop through each mutation
@@ -82,7 +89,7 @@ const facebookAutoPostScript = (query, data, imageBlob) => {
         // Check if nodes were added
         if (mutation.type === "childList") {
           // Check if the desired element is now available
-          const desiredElement = getDesiredElementWithAriaLabel()
+          const desiredElement = getDesiredElementWithAriaLabel();
           if (desiredElement) {
             // Disconnect the observer since we found the element
             observer.disconnect();
@@ -93,17 +100,14 @@ const facebookAutoPostScript = (query, data, imageBlob) => {
         }
       }
     };
-  
+
     // Create an observer instance linked to the callback function
     const observer = new MutationObserver(callback);
-  
+
     // Start observing the target node for configured mutations
     observer.observe(targetNode, config);
   }
-  
 
-
-  
   // Usage example
   const grandParentDiv = getGrandParentDivOfSpanWithText();
   if (grandParentDiv) {
@@ -112,14 +116,6 @@ const facebookAutoPostScript = (query, data, imageBlob) => {
   } else {
     console.error("Grandparent div not found");
   }
-  
-
-
-
-
-
-
-
 };
 
 const prepareCodeBlockImageScript = (query, data) => {
