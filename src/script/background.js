@@ -6,7 +6,16 @@ let facebook_tabId;
 let data = {};
 
 const facebookAutoPostScript = (query, data, imageBlob) => {
-  function getGrandParentDivOfSpanWithText() {
+  function clickOnDiv(div) {
+    const clickEvent = new MouseEvent("click", {
+      view: window,
+      bubbles: true,
+      cancelable: true,
+    });
+    div.dispatchEvent(clickEvent);
+  }
+
+  function getPopupOpenerDiv() {
     const spans = document.querySelectorAll("span");
 
     for (const span of spans) {
@@ -26,25 +35,9 @@ const facebookAutoPostScript = (query, data, imageBlob) => {
     return null; // If not found
   }
 
-  function clickOnDiv(div) {
-    const clickEvent = new MouseEvent("click", {
-      view: window,
-      bubbles: true,
-      cancelable: true,
-    });
-    div.dispatchEvent(clickEvent);
-  }
-
-
-  function sendKeyPress(element, key) {
-    element.dispatchEvent(new KeyboardEvent('keydown', { key }));
-    element.dispatchEvent(new KeyboardEvent('keypress', { key }));
-    element.dispatchEvent(new KeyboardEvent('keyup', { key }));
-  }
-
-  function getDesiredElementWithAriaLabel() {
+  function getLexicalEditorCaptionDiv() {
     const elements = document.querySelectorAll(
-      'div[contenteditable="true"][role="textbox"]'
+      'div[contenteditable="true"][role="textbox"][data-lexical-editor="true"]'
     );
 
     for (const element of elements) {
@@ -57,64 +50,91 @@ const facebookAutoPostScript = (query, data, imageBlob) => {
     return null; // If not found
   }
 
-  function handleDesiredElementFound(lexicalEditor) {
-    // Your code to interact with the desired element
-    console.log("Found the main editing area:", lexicalEditor);
-
-
-    sendKeyPress(lexicalEditor, 'H');
-    sendKeyPress(lexicalEditor, 'e');
-    sendKeyPress(lexicalEditor, 'l');
-    sendKeyPress(lexicalEditor, 'l');
-    sendKeyPress(lexicalEditor, 'o');
-
-
-
-
-
+  function handleCaptionEditor(lexicalEditor) {
+    waitForElm("p", lexicalEditor).then((pTag) => {
+      // ensuring the editor is loaded
+      const inputEvent = new InputEvent("input", {
+        data: "Hello, world!",
+        inputType: "insertText",
+        dataTransfer: null,
+        isComposing: false,
+        bubbles: true,
+      });
+      lexicalEditor.dispatchEvent(inputEvent);
+    });
   }
 
-  // Function to create a MutationObserver
-  function observeDOMChanges() {
-    // Select the target node for the observer
-    const targetNode = document.body;
+  const waitForElm = (selector, parentNode = null, timeout = null) =>
+    new Promise((resolve, reject) => {
+      if (!selector) reject("no selector");
+      if (!parentNode) parentNode = globalThis.document.body;
 
-    // Options for the observer (in this case, we want to observe childList changes)
+      const checkNode = (node) => {
+        if (node.matches(selector)) {
+          resolve(node);
+          observer.disconnect();
+        }
+      };
+
+      const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          const addedNodes = Array.from(mutation.addedNodes);
+          addedNodes.forEach((node) => {
+            checkNode(node);
+            if (node.querySelectorAll) {
+              const descendants = Array.from(node.querySelectorAll(selector));
+              descendants.forEach((descendant) => {
+                checkNode(descendant);
+              });
+            }
+          });
+        });
+      });
+
+      observer.observe(parentNode, {
+        childList: true,
+        subtree: true,
+      });
+
+      if (timeout) {
+        setTimeout(() => {
+          observer.disconnect();
+          reject("timeout");
+        }, timeout);
+      }
+    });
+
+  // Function to create a MutationObserver
+  const observeDOMChanges = (findDesiredElement, callback) => {
+    const targetNode = document.body;
     const config = { childList: true, subtree: true };
 
-    // Callback function to execute when mutations are observed
-    const callback = function (mutationsList, observer) {
-      // Loop through each mutation
+    const mutationCallback = (mutationsList, observer) => {
       for (const mutation of mutationsList) {
-        // Check if nodes were added
         if (mutation.type === "childList") {
-          // Check if the desired element is now available
-          const desiredElement = getDesiredElementWithAriaLabel();
+          const desiredElement = findDesiredElement();
           if (desiredElement) {
-            // Disconnect the observer since we found the element
             observer.disconnect();
-            // Call the function to handle the desired element
-            handleDesiredElementFound(desiredElement);
+            callback(desiredElement);
             break;
           }
         }
       }
     };
 
-    // Create an observer instance linked to the callback function
-    const observer = new MutationObserver(callback);
-
-    // Start observing the target node for configured mutations
+    const observer = new MutationObserver(mutationCallback);
     observer.observe(targetNode, config);
-  }
+
+    return observer; // Return the observer in case it needs to be disconnected externally
+  };
 
   // Usage example
-  const grandParentDiv = getGrandParentDivOfSpanWithText();
-  if (grandParentDiv) {
-    clickOnDiv(grandParentDiv);
-    observeDOMChanges();
+  const popupOpenerDiv = getPopupOpenerDiv();
+  if (popupOpenerDiv) {
+    clickOnDiv(popupOpenerDiv);
+    observeDOMChanges(getLexicalEditorCaptionDiv, handleCaptionEditor);
   } else {
-    console.error("Grandparent div not found");
+    console.error(`"Create Post" Popup opener div not found`);
   }
 };
 
