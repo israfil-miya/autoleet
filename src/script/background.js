@@ -5,7 +5,11 @@ let ray_so_tabId;
 let facebook_tabId;
 let data = {};
 
-const facebookAutoPostScript = (query, data, imageBlob) => {
+const facebookAutoPostScript = (query, data, imageBase64) => {
+  const imageBlob = base64ToBlob(imageBase64);
+
+  console.log(query, data, imageBlob);
+
   function clickOnDiv(div) {
     const clickEvent = new MouseEvent("click", {
       view: window,
@@ -13,6 +17,18 @@ const facebookAutoPostScript = (query, data, imageBlob) => {
       cancelable: true,
     });
     div.dispatchEvent(clickEvent);
+  }
+
+  function base64ToBlob(base64String) {
+    const [dataType, base64Data] = base64String.split(";base64,");
+    const contentType = dataType.split(":")[1];
+    const byteCharacters = atob(base64Data);
+    const byteNumbers = new Array(byteCharacters.length);
+    for (let i = 0; i < byteCharacters.length; i++) {
+      byteNumbers[i] = byteCharacters.charCodeAt(i);
+    }
+    const byteArray = new Uint8Array(byteNumbers);
+    return new Blob([byteArray], { type: contentType });
   }
 
   function getPopupOpenerDiv() {
@@ -61,7 +77,57 @@ const facebookAutoPostScript = (query, data, imageBlob) => {
         bubbles: true,
       });
       lexicalEditor.dispatchEvent(inputEvent);
+
+      handleInsertPostImage(imageBlob);
     });
+  }
+
+  function handleInsertPostImage(blobImg) {
+    // Ensure that blobImg contains valid data
+    if (!blobImg) {
+      console.error("Invalid blob data");
+      return;
+    }
+    console.log(blobImg);
+
+    // Get the input element
+    var inputElement = document.querySelector(
+      'input[type="file"][accept="image/*,image/heif,image/heic,video/*,video/mp4,video/x-m4v,video/x-matroska,.mkv"]'
+    );
+    // Ensure that the input element is found
+    if (!inputElement) {
+      console.error("Input element not found");
+      return;
+    }
+    console.log("Input element:", inputElement);
+
+    // Create a File object from the Blob
+    var file = new File([blobImg], "image.jpg", { type: "image/png" });
+    console.log("File:", file);
+
+    // Get the div element that acts as the drop target
+    var dropTargetDiv = inputElement.parentElement.querySelector(
+      'div[role="button"][tabindex="0"]'
+    );
+    if (!dropTargetDiv) {
+      console.error("Drop target div not found");
+      return;
+    }
+
+    // Create a new DataTransfer object
+    var dataTransfer = new DataTransfer();
+    // Add the file to the DataTransfer object
+    dataTransfer.items.add(file);
+
+    // Create a drop event
+    var dropEvent = new DragEvent("drop", {
+      bubbles: true,
+      cancelable: true,
+      dataTransfer: dataTransfer,
+    });
+
+    // Dispatch the drop event on the drop target div
+    dropTargetDiv.dispatchEvent(dropEvent);
   }
 
   const waitForElm = (selector, parentNode = null, timeout = null) =>
@@ -187,11 +253,33 @@ async function executeScriptOnTabLoad(tabId, script, ...args) {
 
     tabUpdated.then(async () => {
       try {
+        // Convert blob to data URL using FileReader
+        const argsWithBlobConverted = await Promise.all(
+          args.map(async (arg) => {
+            if (arg instanceof Blob) {
+              return new Promise((resolveReader, rejectReader) => {
+                const reader = new FileReader();
+                reader.onload = function () {
+                  resolveReader(reader.result);
+                };
+                reader.onerror = function (error) {
+                  rejectReader(error);
+                };
+                reader.readAsDataURL(arg);
+              });
+            }
+            return arg;
+          })
+        );
+
+        console.log("Args", argsWithBlobConverted);
+
         await chrome.scripting.executeScript({
           target: { tabId: tabId },
           func: script,
-          args: args,
+          args: argsWithBlobConverted,
         });
+
         resolve();
       } catch (error) {
         reject(error);
@@ -403,6 +491,7 @@ async function readLatestDownloadedFile() {
     const response = await fetch(fileURL);
     if (response.ok) {
       const blobData = await response.blob();
+      console.log(blobData);
       return blobData;
     } else {
       console.error("Fetch Error:", response.statusText);
@@ -434,6 +523,7 @@ chrome.downloads.onChanged.addListener(async function onDownloadChanged(
 function uploadToFacebook(data, imageBlob) {
   return new Promise(async (resolve, reject) => {
     try {
+      console.log(imageBlob);
       let tabId = await openFacebookTab();
 
       console.log("facebook Tab ID: ", tabId);
