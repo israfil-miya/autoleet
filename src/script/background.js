@@ -136,7 +136,26 @@ const facebookAutoPostScript = (query, data, imageBase64) => {
     let postButton = document.querySelector(
       'div[aria-label="Post"][role="button"]'
     );
-    clickOnDiv(postButton);
+
+    waitForClickable(postButton, function () {
+      clickOnDiv(postButton);
+    });
+  }
+
+  function waitForClickable(element, callback) {
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (
+          mutation.type === "attributes" &&
+          mutation.attributeName === "tabindex"
+        ) {
+          callback();
+          observer.disconnect();
+        }
+      });
+    });
+
+    observer.observe(element, { attributes: true });
   }
 
   const waitForElm = (selector, parentNode = null, timeout = null) =>
@@ -202,7 +221,6 @@ const facebookAutoPostScript = (query, data, imageBase64) => {
 
     return observer; // Return the observer in case it needs to be disconnected externally
   };
-
 
   // Begins here
   const popupOpenerDiv = getPopupOpenerDiv();
