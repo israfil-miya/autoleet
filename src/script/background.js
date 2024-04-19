@@ -128,6 +128,15 @@ const facebookAutoPostScript = (query, data, imageBase64) => {
 
     // Dispatch the drop event on the drop target div
     dropTargetDiv.dispatchEvent(dropEvent);
+
+    handleClickPostButton();
+  }
+
+  function handleClickPostButton() {
+    let postButton = document.querySelector(
+      'div[aria-label="Post"][role="button"]'
+    );
+    clickOnDiv(postButton);
   }
 
   const waitForElm = (selector, parentNode = null, timeout = null) =>
@@ -194,7 +203,8 @@ const facebookAutoPostScript = (query, data, imageBase64) => {
     return observer; // Return the observer in case it needs to be disconnected externally
   };
 
-  // Usage example
+
+  // Begins here
   const popupOpenerDiv = getPopupOpenerDiv();
   if (popupOpenerDiv) {
     clickOnDiv(popupOpenerDiv);
