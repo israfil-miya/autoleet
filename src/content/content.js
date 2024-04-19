@@ -36,6 +36,8 @@ function openCustomPopup(data) {
         <input type="text" id="spaceInput" name="space" placeholder="Enter space complexity...">
         <label for="timeInput">Time Complexity:</label>
         <input type="text" id="timeInput" name="time" placeholder="Enter time complexity...">
+        <label for="generatedCaption">Generated Caption Text:</label>
+        <textarea id="generatedCaption" name="caption" placeholder="Caption...">...</textarea>
         <br><br>
         <button type="submit">Submit</button>
       </form>
@@ -43,6 +45,44 @@ function openCustomPopup(data) {
   `;
 
   document.body.appendChild(popupDiv);
+
+  var languageInput = document.getElementById("languageInput");
+  var titleInput = document.getElementById("titleInput");
+  var spaceInput = document.getElementById("spaceInput");
+  var timeInput = document.getElementById("timeInput");
+
+  var generatedCaption = document.getElementById("generatedCaption");
+
+  let captionText = `#Leetcode daily [${data.date}] - [${
+    titleInput.value
+  }]\n\n${
+    timeInput.value !== undefined ? "🔰 " + languageInput.value : null
+  }\n${
+    timeInput.value !== undefined ? "⏳ " + timeInput.value + " : Time" : null
+  }\n${
+    timeInput.value !== undefined ? "📁 " + spaceInput.value + " : Space" : null
+  }`;
+  generatedCaption.value = captionText;
+
+  languageInput.addEventListener("input", updateGeneratedCaption);
+  titleInput.addEventListener("input", updateGeneratedCaption);
+  spaceInput.addEventListener("input", updateGeneratedCaption);
+  timeInput.addEventListener("input", updateGeneratedCaption);
+
+  function updateGeneratedCaption() {
+    let captionText = `#Leetcode daily [${data.date}] - [${
+      titleInput.value
+    }]\n\n${
+      timeInput.value !== undefined ? "🔰 " + languageInput.value : null
+    }\n${
+      timeInput.value !== undefined ? "⏳ " + timeInput.value + " : Time" : null
+    }\n${
+      timeInput.value !== undefined
+        ? "📁 " + spaceInput.value + " : Space"
+        : null
+    }`;
+    generatedCaption.value = captionText;
+  }
 
   const form = document.getElementById("customForm");
   form.addEventListener("submit", handleSubmit);
@@ -58,6 +98,7 @@ function handleSubmit(event) {
   const input3Value = document.getElementById("spaceInput").value;
   const input4Value = document.getElementById("timeInput").value;
   const input5Value = document.getElementById("codeTextArea").value;
+  const input6Value = document.getElementById("generatedCaption").value;
 
   chrome.runtime.sendMessage({
     action: "processedData",
@@ -67,6 +108,7 @@ function handleSubmit(event) {
       complexity_space: input3Value,
       complexity_time: input4Value,
       code: input5Value,
+      caption: input6Value,
     },
   });
 

@@ -70,7 +70,7 @@ const facebookAutoPostScript = (query, data, imageBase64) => {
     waitForElm("p", lexicalEditor).then((pTag) => {
       // ensuring the editor is loaded
       const inputEvent = new InputEvent("input", {
-        data: "Hello, world!",
+        data: data.caption,
         inputType: "insertText",
         dataTransfer: null,
         isComposing: false,
@@ -453,13 +453,13 @@ const handleSelectedText = (message, info, tab) => {
       language: detected_language,
       problem_name,
       code: parsed_code,
+      date: getTodaysDate(),
     },
   });
 };
 
 const handleProcessedData = async (message, info, tab) => {
-  data = { ...message.data, date: getTodaysDate() };
-
+  data = message.data;
   await downloadCodeImage(data, encode(data.code));
 };
 
@@ -548,18 +548,21 @@ chrome.downloads.onChanged.addListener(async function onDownloadChanged(
   }
 });
 
-function uploadToFacebook(data, imageBlob) {
+async function uploadToFacebook(data, imageBlob) {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log(imageBlob);
       let tabId = await openFacebookTab();
 
-      console.log("facebook Tab ID: ", tabId);
+      console.log("Facebook Tab ID: ", tabId);
 
       let selectors = {
         postBar: 'div[role="button"][tabindex="0"] > div:has(span)',
       };
 
+      // Activate the tab temporarily
+      await chrome.tabs.update(tabId, { active: true });
+
+      // Perform actions on the tab
       await executeScriptOnTabLoad(
         tabId,
         facebookAutoPostScript,
@@ -567,6 +570,10 @@ function uploadToFacebook(data, imageBlob) {
         data,
         imageBlob
       );
+
+      // Deactivate the tab again
+      await chrome.tabs.update(tabId, { active: false });
+
       resolve(tabId);
     } catch (error) {
       console.log(error);
@@ -599,6 +606,7 @@ function openFacebookTab() {
           createNewFacebookTab(resolve, reject);
         } else {
           // If tab is found, reuse it
+          chrome.tabs.update(facebook_tabId, { url: "https://facebook.com" });
           resolve(facebook_tabId);
         }
       });
