@@ -435,9 +435,9 @@ function getTodaysDate() {
   return formattedDate;
 }
 
-const handleSelectedText = (message, info, tab) => {
-
-
+const handleSelectedText = (message) => {
+  let info = message.info;
+  let tab = message.tab;
 
   let parsed_code = message.selectedText;
 
@@ -460,11 +460,10 @@ const handleSelectedText = (message, info, tab) => {
     },
   });
 
-console.log("Sent the message to open the popup")
-
+  console.log("Sent the message to open the popup");
 };
 
-const handleProcessedData = async (message, info, tab) => {
+const handleProcessedData = async (message) => {
   data = message.data;
   await downloadCodeImage(data, encode(data.code));
 };
@@ -479,20 +478,20 @@ chrome.contextMenus.removeAll(() => {
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.menuItemId === "share_menu_item") {
-    chrome.tabs.sendMessage(tab.id, { action: "getSelectedText" });
-
-    chrome.runtime.onMessage.addListener(async function onMessage(
-      message,
-      _,
-      __
-    ) {
-      if (message.action === "selectedText") {
-        handleSelectedText(message, info, tab);
-      } else if (message.action === "processedData") {
-        chrome.runtime.onMessage.removeListener(onMessage);
-        await handleProcessedData(message, info, tab);
-      }
+    chrome.tabs.sendMessage(tab.id, {
+      action: "getSelectedText",
+      info,
+      tab,
     });
+  }
+});
+
+// Message listener function
+chrome.runtime.onMessage.addListener(async function onMessage(message, _, __) {
+  if (message.action === "selectedText") {
+    handleSelectedText(message);
+  } else if (message.action === "processedData") {
+    await handleProcessedData(message);
   }
 });
 
