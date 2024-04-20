@@ -48,10 +48,10 @@ const openCustomPopup = (data) => {
         <input type="text" id="languageInput" name="language" placeholder="Enter language..." value="${data.language}">
         <label for="titleInput">Title:</label>
         <input type="text" id="titleInput" name="title" placeholder="Enter title..." value="${data.problem_name}">
-        <label for="spaceInput">Space Complexity:</label>
-        <input type="text" id="spaceInput" name="space" placeholder="Enter space complexity...">
         <label for="timeInput">Time Complexity:</label>
         <input type="text" id="timeInput" name="time" placeholder="Enter time complexity...">
+        <label for="spaceInput">Space Complexity:</label>
+        <input type="text" id="spaceInput" name="space" placeholder="Enter space complexity...">
         <label for="generatedCaption">Generated Caption Text:</label>
         <textarea id="generatedCaption" name="caption" placeholder="Caption..."></textarea>
         <br><br>
@@ -84,12 +84,20 @@ const openCustomPopup = (data) => {
 
   cancelButton.addEventListener("click", closeCustomPopup);
 
+  // Close the popup on Esc keypress
+  document.addEventListener("keydown", function(event) {
+    if (event.key === "Escape") {
+      closeCustomPopup();
+    }
+  });
+
+
   function updateGeneratedCaption() {
     let captionText = `#Leetcode daily [${data.date}] - [${
       titleInput.value
-    }]\n\n${languageInput.value ? "🔰 " + languageInput.value : ""}\n${
-      timeInput.value ? "⏳ " + timeInput.value + " : Time" : ""
-    }\n${spaceInput.value ? "📁 " + spaceInput.value + " : Space" : ""}`;
+    }]\n\n${languageInput.value ? "🔰 " + languageInput.value : ""}\n⏳ ${
+      timeInput.value ? timeInput.value : ""
+    } : Time\n📁 ${spaceInput.value ? spaceInput.value : ""} : Space`;
     generatedCaption.value = captionText;
   }
   updateGeneratedCaption(); // Update caption text initially
