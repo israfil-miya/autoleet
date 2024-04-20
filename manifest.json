@@ -1,14 +1,24 @@
 {
   "manifest_version": 3,
-  "name": "Simple Chrome Extension",
-  "version": "1.0",
-  "description": "A simple Chrome Extension example",
-  "permissions": ["activeTab", "contextMenus", "tabs", "scripting", "downloads"],
+  "name": "AutoLeet",
+  "version": "0.1.0",
+  "description": "A chrome extension that takes your code and shares on preferred social media",
+  "permissions": [
+    "activeTab",
+    "contextMenus",
+    "tabs",
+    "scripting",
+    "downloads"
+  ],
   "action": {
     "default_popup": "build/popup/index.html",
-    "default_icon": {
-      "128": "src/public/icons/icon128.png"
-    }
+    "default_icon": "src/public/icons/icon128.png"
+  },
+  "icons": {
+    "128": "src/public/icons/icon128.png",
+    "48": "src/public/icons/icon48.png",
+    "32": "src/public/icons/icon32.png",
+    "16": "src/public/icons/icon16.png"
   },
   "host_permissions": ["*://*/", "file://*"],
   "options_page": "build/options/index.html",

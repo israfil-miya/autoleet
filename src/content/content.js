@@ -17,7 +17,15 @@ const handleParseSelectedText = () => {
   }
 };
 
+let popupOpen = false;
+
 function openCustomPopup(data) {
+  if (popupOpen) {
+    return;
+  }
+
+  popupOpen = true;
+
   const popupDiv = document.createElement("div");
   popupDiv.id = "customPopup";
   popupDiv.classList.add("popup-overlay");
@@ -37,7 +45,7 @@ function openCustomPopup(data) {
         <label for="timeInput">Time Complexity:</label>
         <input type="text" id="timeInput" name="time" placeholder="Enter time complexity...">
         <label for="generatedCaption">Generated Caption Text:</label>
-        <textarea id="generatedCaption" name="caption" placeholder="Caption...">...</textarea>
+        <textarea id="generatedCaption" name="caption" placeholder="Caption..."></textarea>
         <br><br>
         <button type="submit">Submit</button>
       </form>
@@ -46,78 +54,120 @@ function openCustomPopup(data) {
 
   document.body.appendChild(popupDiv);
 
+  console.log("Executed append child");
+
   var languageInput = document.getElementById("languageInput");
   var titleInput = document.getElementById("titleInput");
   var spaceInput = document.getElementById("spaceInput");
   var timeInput = document.getElementById("timeInput");
-
   var generatedCaption = document.getElementById("generatedCaption");
 
-  let captionText = `#Leetcode daily [${data.date}] - [${
-    titleInput.value
-  }]\n\n${
-    timeInput.value !== undefined ? "🔰 " + languageInput.value : null
-  }\n${
-    timeInput.value !== undefined ? "⏳ " + timeInput.value + " : Time" : null
-  }\n${
-    timeInput.value !== undefined ? "📁 " + spaceInput.value + " : Space" : null
-  }`;
-  generatedCaption.value = captionText;
+  console.log("Executed get elements");
 
+  // Update caption text initially
+  updateGeneratedCaption();
+
+  console.log("Executed set generated caption initial");
+
+  // Add event listeners to update caption text dynamically
   languageInput.addEventListener("input", updateGeneratedCaption);
   titleInput.addEventListener("input", updateGeneratedCaption);
   spaceInput.addEventListener("input", updateGeneratedCaption);
   timeInput.addEventListener("input", updateGeneratedCaption);
 
-  function updateGeneratedCaption() {
-    let captionText = `#Leetcode daily [${data.date}] - [${
-      titleInput.value
-    }]\n\n${
-      timeInput.value !== undefined ? "🔰 " + languageInput.value : null
-    }\n${
-      timeInput.value !== undefined ? "⏳ " + timeInput.value + " : Time" : null
-    }\n${
-      timeInput.value !== undefined
-        ? "📁 " + spaceInput.value + " : Space"
-        : null
-    }`;
-    generatedCaption.value = captionText;
-  }
+  console.log("Executed added event listeners");
 
   const form = document.getElementById("customForm");
-  form.addEventListener("submit", handleSubmit);
+
+  const submitButton = document.querySelector(
+    "#customForm button[type=submit]"
+  );
+  submitButton.addEventListener("click", handleSubmit);
 
   const cancelButton = document.getElementById("cancelButton");
   cancelButton.addEventListener("click", closeCustomPopup);
-}
 
-function handleSubmit(event) {
-  event.preventDefault();
-  const input1Value = document.getElementById("languageInput").value;
-  const input2Value = document.getElementById("titleInput").value;
-  const input3Value = document.getElementById("spaceInput").value;
-  const input4Value = document.getElementById("timeInput").value;
-  const input5Value = document.getElementById("codeTextArea").value;
-  const input6Value = document.getElementById("generatedCaption").value;
+  console.log("Executed added cancel button listener", cancelButton);
 
-  chrome.runtime.sendMessage({
-    action: "processedData",
-    data: {
-      language: input1Value,
-      title: input2Value,
-      complexity_space: input3Value,
-      complexity_time: input4Value,
-      code: input5Value,
-      caption: input6Value,
-    },
-  });
+  function updateGeneratedCaption() {
+    let captionText = `#Leetcode daily [${data.date}] - [${
+      titleInput.value
+    }]\n\n${languageInput.value ? "🔰 " + languageInput.value : ""}\n${
+      timeInput.value ? "⏳ " + timeInput.value + " : Time" : ""
+    }\n${spaceInput.value ? "📁 " + spaceInput.value + " : Space" : ""}`;
+    generatedCaption.value = captionText;
+  }
 
-  closeCustomPopup();
-}
+  function closeCustomPopup() {
+    console.log("Executed closeCustomPopup function");
+  
+    popupOpen = false;
+  
+    const popupDiv = document.getElementById("customPopup");
+    if (popupDiv) {
+      // Reset input fields
+      const languageInput = document.getElementById("languageInput");
+      const titleInput = document.getElementById("titleInput");
+      const spaceInput = document.getElementById("spaceInput");
+      const timeInput = document.getElementById("timeInput");
+      const generatedCaption = document.getElementById("generatedCaption");
+  
+      languageInput.value = "";
+      titleInput.value = "";
+      spaceInput.value = "";
+      timeInput.value = "";
+      generatedCaption.value = "";
+  
+      console.log('Executed set values to " " ');
+  
+      // Remove popup
+      popupDiv.remove();
+  
+      console.log("Executed removed popup");
+      
+      // Remove event listeners to avoid duplication
+      languageInput.removeEventListener("input", updateGeneratedCaption);
+      titleInput.removeEventListener("input", updateGeneratedCaption);
+      spaceInput.removeEventListener("input", updateGeneratedCaption);
+      timeInput.removeEventListener("input", updateGeneratedCaption);
+      form.removeEventListener("submit", handleSubmit);
+      cancelButton.removeEventListener("click", closeCustomPopup);
+      // Remove submit event listener when closing the popup
+      submitButton.removeEventListener("click", handleSubmit);
+  
+      console.log("Executed removed event listeners");
+    }
+  }
+  
+  function handleSubmit(event) {
+    console.log("Executed submit function");
 
-function closeCustomPopup() {
-  const popupDiv = document.getElementById("customPopup");
-  if (popupDiv) {
-    popupDiv.remove();
+    event.preventDefault();
+    if (!popupOpen) {
+      return;
+    }
+
+    const input1Value = languageInput.value;
+    const input2Value = titleInput.value;
+    const input3Value = spaceInput.value;
+    const input4Value = timeInput.value;
+    const input5Value = document.getElementById("codeTextArea").value;
+    const input6Value = generatedCaption.value;
+
+    chrome.runtime.sendMessage({
+      action: "processedData",
+      data: {
+        language: input1Value,
+        title: input2Value,
+        complexity_space: input3Value,
+        complexity_time: input4Value,
+        code: input5Value,
+        caption: input6Value,
+      },
+    });
+
+    console.log("Executed send message to background.js");
+
+    closeCustomPopup();
   }
 }
