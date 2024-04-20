@@ -1,9 +1,11 @@
 chrome.runtime.onMessage.addListener((message, _, __) => {
   if (message.action === "openCustomPopup") {
-    openCustomPopup(message.data);
+    openCustomPopup(message.data)
+    console.log("Executed openCustomPopup");
   } else if (message.action === "getSelectedText") {
     let selectedText = handleParseSelectedText();
     chrome.runtime.sendMessage({ action: "selectedText", selectedText });
+    console.log("Sent selected text to background.js")
   }
 });
 
@@ -17,8 +19,35 @@ const handleParseSelectedText = () => {
   }
 };
 
-let popupOpen = false;
 
+
+
+
+
+
+
+let inputValues = {
+  language: "",
+  title: "",
+  complexity_space: "",
+  complexity_time: "",
+  code: "",
+  caption: "",
+};
+
+let submitClicked = false; // Flag to track if the submit button was clicked
+
+handleSendData = () => {
+  if (submitClicked) {
+    chrome.runtime.sendMessage({
+      action: "processedData",
+      data: inputValues,
+    });
+    submitClicked = false; // Reset the flag after sending the message
+  }
+}
+
+let popupOpen = false;
 function openCustomPopup(data) {
   if (popupOpen) {
     return;
@@ -47,7 +76,7 @@ function openCustomPopup(data) {
         <label for="generatedCaption">Generated Caption Text:</label>
         <textarea id="generatedCaption" name="caption" placeholder="Caption..."></textarea>
         <br><br>
-        <button type="submit">Submit</button>
+        <button id="submitBtn">Submit</button>
       </form>
     </div>
   `;
@@ -77,32 +106,35 @@ function openCustomPopup(data) {
 
   console.log("Executed added event listeners");
 
-  const form = document.getElementById("customForm");
+  const submitButton = document.getElementById("submitBtn");
 
-  const submitButton = document.querySelector(
-    "#customForm button[type=submit]"
-  );
-  submitButton.addEventListener("click", handleSubmit);
+  // Check if there's already an event listener attached to the submit button
+  console.log("Existing event listeners for submitButton:", submitButton.onclick);
+
+  // Attach event listener for submit button only if it's not already attached
+  if (!submitButton.onclick) {
+    submitButton.addEventListener("click", handleSubmit);
+    console.log("Executed added submit button listener");
+  } else {
+    console.log("Submit button listener already exists");
+  }
 
   const cancelButton = document.getElementById("cancelButton");
+
   cancelButton.addEventListener("click", closeCustomPopup);
 
   console.log("Executed added cancel button listener", cancelButton);
 
   function updateGeneratedCaption() {
-    let captionText = `#Leetcode daily [${data.date}] - [${
-      titleInput.value
-    }]\n\n${languageInput.value ? "🔰 " + languageInput.value : ""}\n${
-      timeInput.value ? "⏳ " + timeInput.value + " : Time" : ""
-    }\n${spaceInput.value ? "📁 " + spaceInput.value + " : Space" : ""}`;
+    let captionText = `#Leetcode daily [${data.date}] - [${titleInput.value
+      }]\n\n${languageInput.value ? "🔰 " + languageInput.value : ""}\n${timeInput.value ? "⏳ " + timeInput.value + " : Time" : ""
+      }\n${spaceInput.value ? "📁 " + spaceInput.value + " : Space" : ""}`;
     generatedCaption.value = captionText;
   }
 
-  function closeCustomPopup() {
+  function closeCustomPopup(event) {
     console.log("Executed closeCustomPopup function");
-  
-    popupOpen = false;
-  
+
     const popupDiv = document.getElementById("customPopup");
     if (popupDiv) {
       // Reset input fields
@@ -111,34 +143,36 @@ function openCustomPopup(data) {
       const spaceInput = document.getElementById("spaceInput");
       const timeInput = document.getElementById("timeInput");
       const generatedCaption = document.getElementById("generatedCaption");
-  
+
       languageInput.value = "";
       titleInput.value = "";
       spaceInput.value = "";
       timeInput.value = "";
       generatedCaption.value = "";
-  
+
       console.log('Executed set values to " " ');
-  
-      // Remove popup
-      popupDiv.remove();
-  
-      console.log("Executed removed popup");
-      
-      // Remove event listeners to avoid duplication
+
       languageInput.removeEventListener("input", updateGeneratedCaption);
       titleInput.removeEventListener("input", updateGeneratedCaption);
       spaceInput.removeEventListener("input", updateGeneratedCaption);
       timeInput.removeEventListener("input", updateGeneratedCaption);
-      form.removeEventListener("submit", handleSubmit);
       cancelButton.removeEventListener("click", closeCustomPopup);
-      // Remove submit event listener when closing the popup
       submitButton.removeEventListener("click", handleSubmit);
-  
+
       console.log("Executed removed event listeners");
+
+      // Remove popup
+      popupDiv.remove();
+
+      console.log("Executed removed popup");
+
+      // Reset submitClicked flag
+      submitClicked = false;
+
+      popupOpen = false;
     }
   }
-  
+
   function handleSubmit(event) {
     console.log("Executed submit function");
 
@@ -147,26 +181,16 @@ function openCustomPopup(data) {
       return;
     }
 
-    const input1Value = languageInput.value;
-    const input2Value = titleInput.value;
-    const input3Value = spaceInput.value;
-    const input4Value = timeInput.value;
-    const input5Value = document.getElementById("codeTextArea").value;
-    const input6Value = generatedCaption.value;
+    submitClicked = true; // Set flag to indicate submission via submit button
 
-    chrome.runtime.sendMessage({
-      action: "processedData",
-      data: {
-        language: input1Value,
-        title: input2Value,
-        complexity_space: input3Value,
-        complexity_time: input4Value,
-        code: input5Value,
-        caption: input6Value,
-      },
-    });
+    inputValues.language = languageInput.value;
+    inputValues.title = titleInput.value;
+    inputValues.complexity_space = spaceInput.value;
+    inputValues.complexity_time = timeInput.value;
+    inputValues.code = document.getElementById("codeTextArea").value;
+    inputValues.caption = generatedCaption.value;
 
-    console.log("Executed send message to background.js");
+    handleSendData();
 
     closeCustomPopup();
   }

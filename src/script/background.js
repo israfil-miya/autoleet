@@ -436,6 +436,9 @@ function getTodaysDate() {
 }
 
 const handleSelectedText = (message, info, tab) => {
+
+
+
   let parsed_code = message.selectedText;
 
   let title_end_index = info.pageUrl.indexOf("/", 31);
@@ -456,6 +459,9 @@ const handleSelectedText = (message, info, tab) => {
       date: getTodaysDate(),
     },
   });
+
+console.log("Sent the message to open the popup")
+
 };
 
 const handleProcessedData = async (message, info, tab) => {
