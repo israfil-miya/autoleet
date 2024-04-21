@@ -1,19 +1,33 @@
 {
-  "name": "extension",
-  "version": "1.0.0",
-  "description": "",
+  "name": "autoleet",
+  "version": "0.1.0",
+  "description": "A chrome extension that takes your code and shares on preferred social media",
   "main": "background.js",
+  "private": true,
   "scripts": {
     "build": "node build.js",
     "start": "nodemon --watch src --ext js,mjs,cjs,json,css,html --exec \"node build.js\""
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "chrome-extension",
+    "chrome",
+    "esbuild"
+  ],
+  "author": "Israfil Miya <israfilmiya120@gmail.com>",
+  "license": "UNLICENSED",
   "dependencies": {
     "fs-extra": "^11.2.0",
     "moment-timezone": "^0.5.45",
     "underscore": "^1.13.6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/israfil-miya/autoleet"
+  },
+  "homepage": "https://github.com/israfil-miya/autoleet#readme",
+  "bugs": {
+    "url": "https://github.com/israfil-miya/autoleet/issues",
+    "email": "israfilmiya120@gmail.com"
   },
   "devDependencies": {
     "esbuild": "^0.20.2",
