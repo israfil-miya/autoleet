@@ -11,7 +11,9 @@
   "keywords": [
     "chrome-extension",
     "chrome",
-    "esbuild"
+    "esbuild",
+    "leetcode",
+    "automation"
   ],
   "author": "Israfil Miya <israfilmiya120@gmail.com>",
   "license": "UNLICENSED",
