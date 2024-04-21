@@ -19,7 +19,7 @@ npm run build
 - Go to `chrome://extensions`
 - Enable the `Developer mode` toggle
 - Click on `Load unpacked`
-- Select the download `autoleet` folder (root)
+- Select the downloaded `autoleet` folder (root)
 
 ### Usage
 
