@@ -23,9 +23,10 @@ npm run build
 
 ### Usage
 
-- Go to `leetcode.com` and Open any problem
+- Go to `leetcode.com` and open any problem
   <img src="https://i.ibb.co/Tb5nZ4R/step-1.png" alt="step-1" width="80%" height="auto">
-- Solve the problem and submit your answer. Go to your submission from `Submissions` tab
+
+- Solve the problem and submit your answer, then go to your submission from the `Submissions` tab
   <img src="https://i.ibb.co/RQv7Hmp/step-2.png" alt="step-2" width="80%" height="auto">
 
 - Select the code you want to share
