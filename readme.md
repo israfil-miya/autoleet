@@ -40,6 +40,6 @@ npm run build
 
 <br/>
 
-> The extension will then open `ray.so` website in a new tab, generate the code block image from the selected text/code and then download it automatically. When the download finishes the extension will open `facebook.com` in a new tab and you will redirected to that tab. The extension will then automatically trigger the facebook's `Create Post` popup and fill-in Caption & Image and then post it.
+> The extension will then open `ray.so` website in a new tab, generate the code block image from the selected text/code and then download it automatically. When the download finishes the extension will open `facebook.com` in a new tab and you will be redirected to that tab. The extension will then automatically trigger the facebook's `Create Post` popup and fill-in Caption & Image and then post it.
 
 > _Make sure you are logged in to `facebook.com` before using the extension_
