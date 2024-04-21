@@ -1,5 +1,6 @@
 import detectLang from "./lang-detector";
 import { encode } from "./base64";
+import moment from "moment-timezone";
 
 let ray_so_tabId;
 let facebook_tabId;
@@ -361,92 +362,22 @@ function downloadCodeImage(data, encodedCode) {
   });
 }
 
-function formatText(text) {
-  const words = (text + " ")
-    .replace(/[-_]+|\B\b/g, " ")
-    .trim()
-    .split(/\s+/);
-
-  const titleCasedWords = words.map(
-    (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-  );
-
-  const formattedText = titleCasedWords.join(" ");
-
-  const linkRegex = /\[([^\])]+)]\(([^)]+)\)/g;
-  const linkMatches = formattedText.matchAll(linkRegex);
-
-  let result = formattedText;
-  for (const match of linkMatches) {
-    const linkText = match[1];
-    const url = decodeURIComponent(match[2]);
-
-    result =
-      result.slice(0, match.index) +
-      ` [${linkText}](${url}) ` +
-      result.slice(match.index + match[0].length);
-  }
-
-  return result.trim();
-}
-
 function getTodaysDate() {
-  const today = new Date();
-  const day = today.getDate();
-  const month = today.getMonth();
-  const year = today.getFullYear();
+  const today = moment();
+  const day = today.format("Do");
+  const month = today.format("MMM");
+  const year = today.format("YY");
 
-  const ordinal = ((day) => {
-    const ones = day % 10;
-    const tens = Math.floor(day / 10);
-    if (tens === 1) {
-      return "th";
-    } else {
-      switch (ones) {
-        case 1:
-          return "st";
-        case 2:
-          return "nd";
-        case 3:
-          return "rd";
-        default:
-          return "th";
-      }
-    }
-  })(day);
-
-  const monthNames = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
-  ];
-  const monthName = monthNames[month];
-
-  const formattedDate = `${day}${ordinal} ${monthName} ${year}`;
-  return formattedDate;
+  return `${day} ${month}'${year}`;
 }
 
 const handleSelectedText = (message) => {
-  let info = message.info;
+  // let info = message.info;
   let tab = message.tab;
 
   let parsed_code = message.selectedText;
 
-  let title_end_index = info.pageUrl.indexOf("/", 31);
-  let title_start_index = info.pageUrl.indexOf("/", 25);
-
-  let problem_name = formatText(
-    info.pageUrl.substring(title_start_index + 1, title_end_index)
-  );
+  let problem_name = message.problemName;
 
   let detected_language = detectLang(parsed_code);
 

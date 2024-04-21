@@ -47,5 +47,6 @@ entryPoints.forEach(({ name, entry, outdir }) => {
     ...esbuildOptions,
     entryPoints: { [name]: entry },
     outdir: path.join(buildDir, outdir),
+    
   }).catch(() => process.exit(1));
 });
