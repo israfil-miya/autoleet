@@ -26,10 +26,10 @@ npm run build
 - Go to `leetcode.com` and open any problem
   <img src="https://i.ibb.co/Tb5nZ4R/step-1.png" alt="step-1" width="80%" height="auto">
 
-- Solve the problem and submit your answer, then go to your submission from the `Submissions` tab
+- Solve the problem and submit your answer
   <img src="https://i.ibb.co/RQv7Hmp/step-2.png" alt="step-2" width="80%" height="auto">
 
-- Select the code you want to share
+- Select the part of the code you want to share
   <img src="https://i.ibb.co/Vtxstfv/step-3.png" alt="step-3" width="80%" height="auto">
 
 - Right click on the selection and choose `Share to social media`
