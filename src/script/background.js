@@ -458,10 +458,12 @@ async function readLatestDownloadedFile() {
       console.log(blobData);
       return blobData;
     } else {
-      console.error("Fetch Error:", response.statusText);
+      // console.log("Fetch Error:", response.statusText);
+      return null;
     }
   } catch (error) {
-    console.error("Error reading latest downloaded file:", error);
+    // console.log("Error reading latest downloaded file:", error);
+    return null;
   }
 }
 
@@ -475,8 +477,15 @@ chrome.downloads.onChanged.addListener(async function onDownloadChanged(
     }
 
     let imageBlob = await readLatestDownloadedFile();
+
+    
     console.log("Image Blob:", imageBlob);
     console.log("Code Data:", data);
+
+
+    if(!imageBlob) {
+      return;
+    }
 
     await uploadToFacebook(data, imageBlob);
 
