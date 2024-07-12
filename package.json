@@ -5,8 +5,10 @@
   "main": "background.js",
   "private": true,
   "scripts": {
+    "start": "nodemon --watch src --ext ts,tsx,js,mjs,cjs,json,css,html --exec \"npm run build\"",
     "build": "node build.js",
-    "start": "nodemon --watch src --ext js,mjs,cjs,json,css,html --exec \"node build.js\""
+    "clean": "rimraf build",
+    "dev": "npm run clean && npm run build && npm start"
   },
   "keywords": [
     "chrome-extension",
@@ -15,11 +17,15 @@
     "leetcode",
     "automation"
   ],
-  "author": "Israfil Miya <israfilmiya120@gmail.com>",
+  "author": "MD. Israfil Miya <israfilmiya120@gmail.com>",
   "license": "UNLICENSED",
   "dependencies": {
+    "@types/chrome": "^0.0.268",
+    "@types/node": "^20.14.10",
+    "esbuild-plugin-tsc": "^0.4.0",
     "fs-extra": "^11.2.0",
     "moment-timezone": "^0.5.45",
+    "typescript": "^5.5.3",
     "underscore": "^1.13.6"
   },
   "repository": {
@@ -33,6 +39,7 @@
   },
   "devDependencies": {
     "esbuild": "^0.20.2",
-    "nodemon": "^3.1.0"
+    "nodemon": "^3.1.0",
+    "rimraf": "^6.0.1"
   }
 }

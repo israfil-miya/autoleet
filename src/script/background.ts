@@ -342,10 +342,10 @@ function downloadCodeImage(data, encodedCode) {
       let newTabId = await openRaySoTab(data, encodedCode);
 
       let selectors = {
-        title: 'div.Frame_fileName__zfOJA span[data-ignore-in-export="true"]',
-        background: "div.Frame_frame__CAiHj",
-        headerButtons: "div.Frame_controls__xPHKk div.Frame_control__WM3BS",
-        exportButton: "button.ExportButton_button__MA4PI",
+        title: 'div.Frame_fileName__ridJz span[data-ignore-in-export="true"]',
+        background: "div.Frame_frame__rcr69",
+        headerButtons: "div.Frame_controls__hvQWe div.Frame_control__8KxPF",
+        exportButton: 'span.buttonGroup button[aria-label="Export as PNG"]',
       };
 
       await executeScriptOnTabLoad(
@@ -430,16 +430,22 @@ function getLatestDownloadedFile() {
   return new Promise((resolve, reject) => {
     chrome.downloads.search(
       {
-        filenameRegex: "ray-so-export(?:\\s*\\(\\d+\\))?\\.png",
         orderBy: ["-startTime"],
         limit: 1,
       },
       function (downloadItems) {
         if (downloadItems && downloadItems.length > 0) {
           const latestDownload = downloadItems[0];
-          resolve(latestDownload);
+          const filename = latestDownload.filename;
+          const regex = /ray-so-export(?:\s*\(\d+\))?\.png$/;
+
+          if (regex.test(filename)) {
+            resolve(latestDownload);
+          } else {
+            resolve(null);
+          }
         } else {
-          reject(new Error("No matching files found"));
+          resolve(null);
         }
       }
     );
@@ -478,14 +484,14 @@ chrome.downloads.onChanged.addListener(async function onDownloadChanged(
 
     let imageBlob = await readLatestDownloadedFile();
 
-    
     console.log("Image Blob:", imageBlob);
     console.log("Code Data:", data);
 
-
-    if(!imageBlob) {
+    if (!imageBlob) {
       return;
     }
+
+    console.log("Triggering upload to Facebook");
 
     await uploadToFacebook(data, imageBlob);
 
