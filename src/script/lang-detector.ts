@@ -10,6 +10,21 @@ interface LanguageCheckers {
   [key: string]: Checker[];
 }
 
+interface DetectLangOptions {
+  heuristic?: boolean;
+  statistics?: boolean;
+}
+
+interface Result {
+  language: string;
+  points: number;
+}
+
+interface Statistics {
+  detected: string;
+  statistics: [string, number][];
+}
+
 const languages: LanguageCheckers = {
   JavaScript: [
     // undefined keyword
@@ -329,21 +344,6 @@ function getPoints(
     (memo: number, num: number) => memo + num,
     0
   );
-}
-
-interface DetectLangOptions {
-  heuristic?: boolean;
-  statistics?: boolean;
-}
-
-interface Result {
-  language: string;
-  points: number;
-}
-
-interface Statistics {
-  detected: string;
-  statistics: [string, number][];
 }
 
 function detectLang(
