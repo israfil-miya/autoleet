@@ -1,23 +1,49 @@
-chrome.runtime.onMessage.addListener((message, _, __) => {
-  if (message.action === "openCustomPopup") {
-    openCustomPopup(message.data);
-  } else if (message.action === "getSelectedText") {
-    let selectedText = handleParseSelectedText();
-    let problem_name = getProblemName(message.info) || "Unknown";
+interface Message {
+  action: string;
+  info: chrome.contextMenus.OnClickData;
+  tab?: chrome.tabs.Tab;
+  selectedText?: string;
+  problemName?: string;
+  data: Data;
+}
 
-    chrome.runtime.sendMessage({
-      action: "selectedText",
-      selectedText,
-      info: message.info,
-      tab: message.tab,
-      problemName: problem_name,
-    });
+interface Info {
+  pageUrl: string;
+}
+
+interface Data {
+  code: string;
+  language: string;
+  problem_name: string;
+  date: string;
+}
+
+let popupOpen: Boolean = false;
+
+// Function to handle messages from the Chrome runtime
+chrome.runtime.onMessage.addListener(
+  (message: Message, _: chrome.runtime.MessageSender, __: () => void) => {
+    if (message.action === "openCustomPopup") {
+      openCustomPopup(message.data);
+    } else if (message.action === "getSelectedText") {
+      let selectedText = handleParseSelectedText();
+      let problem_name = getProblemName(message.info) || "Unknown";
+
+      chrome.runtime.sendMessage({
+        action: "selectedText",
+        selectedText,
+        info: message.info,
+        tab: message.tab,
+        problemName: problem_name,
+      });
+    }
   }
-});
+);
 
-const handleParseSelectedText = () => {
+// Function to parse selected text from the window
+const handleParseSelectedText = (): string => {
   const selection = window.getSelection();
-  if (selection.rangeCount > 0) {
+  if (selection && selection.rangeCount > 0) {
     const selectedText = selection.toString();
     return selectedText;
   } else {
@@ -25,96 +51,94 @@ const handleParseSelectedText = () => {
   }
 };
 
-let getProblemName = (info) => {
-  function formatText(text) {
-    const smallWords = [
-      "a",
-      "an",
-      "and",
-      "as",
-      "at",
-      "but",
-      "by",
-      "for",
-      "from",
-      "in",
-      "into",
-      "of",
-      "on",
-      "or",
-      "over",
-      "nor",
-      "not",
-      "so",
-      "than",
-      "that",
-      "the",
-      "to",
-      "up",
-      "with",
-      "yet",
-    ];
+function formatText(text: string): string {
+  const smallWords = [
+    "a",
+    "an",
+    "and",
+    "as",
+    "at",
+    "but",
+    "by",
+    "for",
+    "from",
+    "in",
+    "into",
+    "of",
+    "on",
+    "or",
+    "over",
+    "nor",
+    "not",
+    "so",
+    "than",
+    "that",
+    "the",
+    "to",
+    "up",
+    "with",
+    "yet",
+  ];
 
-    const words = (text + " ")
-      .replace(/[-_]+|\B\b/g, " ")
-      .trim()
-      .split(/\s+/);
+  const words = (text + " ")
+    .replace(/[-_]+|\B\b/g, " ")
+    .trim()
+    .split(/\s+/);
 
-    const titleCasedWords = words.map((word, index) => {
-      if (index === 0 || !smallWords.includes(word.toLowerCase())) {
-        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-      } else {
-        return word.toLowerCase();
-      }
-    });
-
-    let formattedText = titleCasedWords.join(" ");
-
-    const linkRegex = /\[([^\])]+)]\(([^)]+)\)/g;
-    const linkMatches = formattedText.matchAll(linkRegex);
-
-    for (const match of linkMatches) {
-      const linkText = match[1];
-      const url = decodeURIComponent(match[2]);
-
-      formattedText =
-        formattedText.slice(0, match.index) +
-        ` [${linkText}](${url}) ` +
-        formattedText.slice(match.index + match[0].length);
+  const titleCasedWords = words.map((word, index) => {
+    if (index === 0 || !smallWords.includes(word.toLowerCase())) {
+      return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    } else {
+      return word.toLowerCase();
     }
+  });
 
-    return formattedText.trim();
+  let formattedText = titleCasedWords.join(" ");
+
+  const linkRegex = /\[([^\])]+)]\(([^)]+)\)/g;
+  const linkMatches = formattedText.matchAll(linkRegex);
+
+  for (const match of linkMatches) {
+    const linkText = match[1];
+    const url = decodeURIComponent(match[2]);
+
+    formattedText =
+      formattedText.slice(0, match.index) +
+      ` [${linkText}](${url}) ` +
+      formattedText.slice(match.index + match[0].length);
   }
 
-  let problem_name;
+  return formattedText.trim();
+}
+
+const getProblemName = (info: Info): string | null => {
+  let problem_name: string | null = null;
 
   if (info.pageUrl.includes("leetcode.com")) {
-    let problem_title_elm = document.querySelector("div.text-title-large > a");
+    const problem_title_elm = document.querySelector(
+      "div.text-title-large > a"
+    );
 
     if (problem_title_elm && problem_title_elm.textContent) {
       problem_name = problem_title_elm.textContent;
     }
   }
 
-  let title_end_index = info.pageUrl.indexOf("/", 31);
-  let title_start_index = info.pageUrl.indexOf("/", 25);
-  let problem_name_from_url = formatText(
+  const title_end_index = info.pageUrl.indexOf("/", 31);
+  const title_start_index = info.pageUrl.indexOf("/", 25);
+  const problem_name_from_url = formatText(
     info.pageUrl.substring(title_start_index + 1, title_end_index)
   );
 
-  if (problem_name == "/" || !problem_name) {
-    if (problem_name_from_url == "/" || !problem_name_from_url) return null;
+  if (problem_name === "/" || !problem_name) {
+    if (problem_name_from_url === "/" || !problem_name_from_url) return null;
     else return problem_name_from_url;
   } else return problem_name;
 };
 
 // Function to open the custom popup
-const openCustomPopup = (data) => {
-  let popupOpen = false;
-
-  if (popupOpen) {
-    return;
-  }
+const openCustomPopup = (data: Data): void => {
+  if (popupOpen) return;
 
   popupOpen = true;
 
@@ -148,15 +172,27 @@ const openCustomPopup = (data) => {
 
   document.body.appendChild(popupDiv);
 
-  const codeInput = document.getElementById("codeTextArea");
-  const languageInput = document.getElementById("languageInput");
-  const titleInput = document.getElementById("titleInput");
-  const spaceInput = document.getElementById("spaceInput");
-  const timeInput = document.getElementById("timeInput");
-  const githubInput = document.getElementById("githubInput");
-  const generatedCaption = document.getElementById("generatedCaption");
-  const submitButton = document.getElementById("submitBtn");
-  const cancelButton = document.getElementById("cancelButton");
+  const codeInput = document.getElementById(
+    "codeTextArea"
+  ) as HTMLTextAreaElement;
+  const languageInput = document.getElementById(
+    "languageInput"
+  ) as HTMLInputElement;
+  const titleInput = document.getElementById("titleInput") as HTMLInputElement;
+  const spaceInput = document.getElementById("spaceInput") as HTMLInputElement;
+  const timeInput = document.getElementById("timeInput") as HTMLInputElement;
+  const githubInput = document.getElementById(
+    "githubInput"
+  ) as HTMLInputElement;
+  const generatedCaption = document.getElementById(
+    "generatedCaption"
+  ) as HTMLTextAreaElement;
+  const submitButton = document.getElementById(
+    "submitBtn"
+  ) as HTMLButtonElement;
+  const cancelButton = document.getElementById(
+    "cancelButton"
+  ) as HTMLButtonElement;
 
   // Add event listeners to update caption text dynamically
   languageInput.addEventListener("input", updateGeneratedCaption);
@@ -179,23 +215,33 @@ const openCustomPopup = (data) => {
     }
   });
 
-  function updateGeneratedCaption() {
-    let captionText = `#Leetcode daily [${data.date}] - [${
-      titleInput.value
-    }]\n\n${languageInput.value ? "🔰 " + languageInput.value : ""}\n⏳ ${
-      timeInput.value ? timeInput.value : ""
-    } : Time\n📁 ${
-      spaceInput.value ? spaceInput.value : ""
-    } : Space\n\n🚀 GitHub Source w/ runner code -\n🌐 ${
-      languageInput.value ? languageInput.value + ": " : ""
-    }${githubInput.value ? githubInput.value : ""}`;
+  function updateGeneratedCaption(): void {
+    const date = data.date;
+    const title = titleInput.value;
+    const language = languageInput.value ? languageInput.value : "";
+    const time = timeInput.value ? timeInput.value : "";
+    const space = spaceInput.value ? spaceInput.value : "";
+    const githubSource = githubInput.value ? githubInput.value : "";
+    const languagePrefix = languageInput.value ? languageInput.value : "";
 
-    generatedCaption.value = captionText;
+    // Don't try formatting this code, it's already formatted like this for a reason.
+    const captionText = `
+#LeetcodeDaily [${date}] - [${title}]
+  
+🔰 Language: ${language}
+⏳ Time: ${time}
+📁 Space: ${space}
+  
+🚀 GitHub Source w/ runner code -
+🌐 ${languagePrefix}: ${githubSource}
+`;
+
+    generatedCaption.value = captionText.trim();
   }
 
   updateGeneratedCaption(); // Update caption text initially
 
-  function closeCustomPopup() {
+  function closeCustomPopup(): void {
     const popupDiv = document.getElementById("customPopup");
     if (popupDiv) {
       // Reset input fields
@@ -222,7 +268,7 @@ const openCustomPopup = (data) => {
     }
   }
 
-  function handleSubmit(event) {
+  function handleSubmit(event: Event): void {
     event.preventDefault();
     if (!popupOpen) {
       return;

@@ -19,15 +19,6 @@
   ],
   "author": "MD. Israfil Miya <israfilmiya120@gmail.com>",
   "license": "UNLICENSED",
-  "dependencies": {
-    "@types/chrome": "^0.0.268",
-    "@types/node": "^20.14.10",
-    "esbuild-plugin-tsc": "^0.4.0",
-    "fs-extra": "^11.2.0",
-    "moment-timezone": "^0.5.45",
-    "typescript": "^5.5.3",
-    "underscore": "^1.13.6"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/israfil-miya/autoleet"
@@ -38,8 +29,16 @@
     "email": "israfilmiya120@gmail.com"
   },
   "devDependencies": {
+    "@types/lodash": "^4.17.7",
+    "lodash": "^4.17.21",
+    "@types/chrome": "^0.0.268",
+    "@types/node": "^20.14.10",
     "esbuild": "^0.20.2",
+    "esbuild-plugin-tsc": "^0.4.0",
+    "fs-extra": "^11.2.0",
+    "moment-timezone": "^0.5.45",
     "nodemon": "^3.1.0",
-    "rimraf": "^6.0.1"
+    "rimraf": "^6.0.1",
+    "typescript": "^5.5.3"
   }
 }
