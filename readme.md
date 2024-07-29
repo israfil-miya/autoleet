@@ -27,17 +27,20 @@ npm run build
 
 - Open `/src/script/background.ts` file
 - Set the `professionalAccount` variable as `true` if you have professional mode enabled for your Facebook account.
+- Default: `true`
 
 #### Confirmation Before Posting:
 
 - Open `/src/script/background.ts` file
 - Set the `requireConfirmationBeforePosting` variable as `true` if you want a confirmation before clicking the post button.
+- Default: `true`
 
 #### Waiting Time After Confirmation:
 
 - Open `/src/script/background.ts` file
 - Set the wait time in seconds in `countdownAfterConfirmationInSeconds` variable.
 - You can set the variable to `0` for no waiting.
+- Default: `5`
 
 ### Usage
 
@@ -60,7 +63,7 @@ npm run build
 ### Flow
 
 - The extension opens [ray.so](https://ray.so/), generates the code block image, and downloads it automatically.
-- After download, it opens [facebook.com](https://www.facebook.com/) and fills in the caption & image for a post (confirmation for professional accounts).
+- After download, it opens [facebook.com](https://www.facebook.com/), fills in the caption and image, and posts.
 
 ### Notes
 
