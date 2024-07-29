@@ -23,21 +23,21 @@ let popupOpen: Boolean = false;
 // Function to handle messages from the Chrome runtime
 chrome.runtime.onMessage.addListener(
   (message: Message, _: chrome.runtime.MessageSender, __: () => void) => {
-    if (message.action === "openCustomPopup") {
+    if (message.action === 'openCustomPopup') {
       openCustomPopup(message.data);
-    } else if (message.action === "getSelectedText") {
+    } else if (message.action === 'getSelectedText') {
       let selectedText = handleParseSelectedText();
-      let problem_name = getProblemName(message.info) || "Unknown";
+      let problem_name = getProblemName(message.info) || 'Unknown';
 
       chrome.runtime.sendMessage({
-        action: "selectedText",
+        action: 'selectedText',
         selectedText,
         info: message.info,
         tab: message.tab,
         problemName: problem_name,
       });
     }
-  }
+  },
 );
 
 // Function to parse selected text from the window
@@ -47,41 +47,41 @@ const handleParseSelectedText = (): string => {
     const selectedText = selection.toString();
     return selectedText;
   } else {
-    return "Unable to parse";
+    return 'Unable to parse';
   }
 };
 
 function formatText(text: string): string {
   const smallWords = [
-    "a",
-    "an",
-    "and",
-    "as",
-    "at",
-    "but",
-    "by",
-    "for",
-    "from",
-    "in",
-    "into",
-    "of",
-    "on",
-    "or",
-    "over",
-    "nor",
-    "not",
-    "so",
-    "than",
-    "that",
-    "the",
-    "to",
-    "up",
-    "with",
-    "yet",
+    'a',
+    'an',
+    'and',
+    'as',
+    'at',
+    'but',
+    'by',
+    'for',
+    'from',
+    'in',
+    'into',
+    'of',
+    'on',
+    'or',
+    'over',
+    'nor',
+    'not',
+    'so',
+    'than',
+    'that',
+    'the',
+    'to',
+    'up',
+    'with',
+    'yet',
   ];
 
-  const words = (text + " ")
-    .replace(/[-_]+|\B\b/g, " ")
+  const words = (text + ' ')
+    .replace(/[-_]+|\B\b/g, ' ')
     .trim()
     .split(/\s+/);
 
@@ -93,7 +93,7 @@ function formatText(text: string): string {
     }
   });
 
-  let formattedText = titleCasedWords.join(" ");
+  let formattedText = titleCasedWords.join(' ');
 
   const linkRegex = /\[([^\])]+)]\(([^)]+)\)/g;
   const linkMatches = formattedText.matchAll(linkRegex);
@@ -114,9 +114,9 @@ function formatText(text: string): string {
 const getProblemName = (info: Info): string | null => {
   let problem_name: string | null = null;
 
-  if (info.pageUrl.includes("leetcode.com")) {
+  if (info.pageUrl.includes('leetcode.com')) {
     const problem_title_elm = document.querySelector(
-      "div.text-title-large > a"
+      'div.text-title-large > a',
     );
 
     if (problem_title_elm && problem_title_elm.textContent) {
@@ -124,14 +124,14 @@ const getProblemName = (info: Info): string | null => {
     }
   }
 
-  const title_end_index = info.pageUrl.indexOf("/", 31);
-  const title_start_index = info.pageUrl.indexOf("/", 25);
+  const title_end_index = info.pageUrl.indexOf('/', 31);
+  const title_start_index = info.pageUrl.indexOf('/', 25);
   const problem_name_from_url = formatText(
-    info.pageUrl.substring(title_start_index + 1, title_end_index)
+    info.pageUrl.substring(title_start_index + 1, title_end_index),
   );
 
-  if (problem_name === "/" || !problem_name) {
-    if (problem_name_from_url === "/" || !problem_name_from_url) return null;
+  if (problem_name === '/' || !problem_name) {
+    if (problem_name_from_url === '/' || !problem_name_from_url) return null;
     else return problem_name_from_url;
   } else return problem_name;
 };
@@ -142,9 +142,9 @@ const openCustomPopup = (data: Data): void => {
 
   popupOpen = true;
 
-  const popupDiv = document.createElement("div");
-  popupDiv.id = "customPopup";
-  popupDiv.classList.add("popup-overlay");
+  const popupDiv = document.createElement('div');
+  popupDiv.id = 'customPopup';
+  popupDiv.classList.add('popup-overlay');
   popupDiv.innerHTML = `
     <div class="popup-container">
       <button class="cancel-button" id="cancelButton">Close</button>
@@ -173,44 +173,44 @@ const openCustomPopup = (data: Data): void => {
   document.body.appendChild(popupDiv);
 
   const codeInput = document.getElementById(
-    "codeTextArea"
+    'codeTextArea',
   ) as HTMLTextAreaElement;
   const languageInput = document.getElementById(
-    "languageInput"
+    'languageInput',
   ) as HTMLInputElement;
-  const titleInput = document.getElementById("titleInput") as HTMLInputElement;
-  const spaceInput = document.getElementById("spaceInput") as HTMLInputElement;
-  const timeInput = document.getElementById("timeInput") as HTMLInputElement;
+  const titleInput = document.getElementById('titleInput') as HTMLInputElement;
+  const spaceInput = document.getElementById('spaceInput') as HTMLInputElement;
+  const timeInput = document.getElementById('timeInput') as HTMLInputElement;
   const githubInput = document.getElementById(
-    "githubInput"
+    'githubInput',
   ) as HTMLInputElement;
   const generatedCaption = document.getElementById(
-    "generatedCaption"
+    'generatedCaption',
   ) as HTMLTextAreaElement;
   const submitButton = document.getElementById(
-    "submitBtn"
+    'submitBtn',
   ) as HTMLButtonElement;
   const cancelButton = document.getElementById(
-    "cancelButton"
+    'cancelButton',
   ) as HTMLButtonElement;
 
   // Add event listeners to update caption text dynamically
-  languageInput.addEventListener("input", updateGeneratedCaption);
-  titleInput.addEventListener("input", updateGeneratedCaption);
-  spaceInput.addEventListener("input", updateGeneratedCaption);
-  timeInput.addEventListener("input", updateGeneratedCaption);
-  githubInput.addEventListener("input", updateGeneratedCaption);
+  languageInput.addEventListener('input', updateGeneratedCaption);
+  titleInput.addEventListener('input', updateGeneratedCaption);
+  spaceInput.addEventListener('input', updateGeneratedCaption);
+  timeInput.addEventListener('input', updateGeneratedCaption);
+  githubInput.addEventListener('input', updateGeneratedCaption);
 
   // Attach event listener for submit button only if it's not already attached
   if (!submitButton.onclick) {
-    submitButton.addEventListener("click", handleSubmit);
+    submitButton.addEventListener('click', handleSubmit);
   }
 
-  cancelButton.addEventListener("click", closeCustomPopup);
+  cancelButton.addEventListener('click', closeCustomPopup);
 
   // Close the popup on Esc keypress
-  document.addEventListener("keydown", function (event) {
-    if (event.key === "Escape") {
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
       closeCustomPopup();
     }
   });
@@ -218,11 +218,11 @@ const openCustomPopup = (data: Data): void => {
   function updateGeneratedCaption(): void {
     const date = data.date;
     const title = titleInput.value;
-    const language = languageInput.value ? languageInput.value : "";
-    const time = timeInput.value ? timeInput.value : "";
-    const space = spaceInput.value ? spaceInput.value : "";
-    const githubSource = githubInput.value ? githubInput.value : "";
-    const languagePrefix = languageInput.value ? languageInput.value : "";
+    const language = languageInput.value ? languageInput.value : '';
+    const time = timeInput.value ? timeInput.value : '';
+    const space = spaceInput.value ? spaceInput.value : '';
+    const githubSource = githubInput.value ? githubInput.value : '';
+    const languagePrefix = languageInput.value ? languageInput.value : '';
 
     // Don't try formatting this code, it's already formatted like this for a reason.
     const captionText = `
@@ -242,25 +242,25 @@ const openCustomPopup = (data: Data): void => {
   updateGeneratedCaption(); // Update caption text initially
 
   function closeCustomPopup(): void {
-    const popupDiv = document.getElementById("customPopup");
+    const popupDiv = document.getElementById('customPopup');
     if (popupDiv) {
       // Reset input fields
-      codeInput.value = "";
-      languageInput.value = "";
-      titleInput.value = "";
-      spaceInput.value = "";
-      timeInput.value = "";
-      githubInput.value = "";
-      generatedCaption.value = "";
+      codeInput.value = '';
+      languageInput.value = '';
+      titleInput.value = '';
+      spaceInput.value = '';
+      timeInput.value = '';
+      githubInput.value = '';
+      generatedCaption.value = '';
 
       // Remove event listeners
-      languageInput.removeEventListener("input", updateGeneratedCaption);
-      titleInput.removeEventListener("input", updateGeneratedCaption);
-      spaceInput.removeEventListener("input", updateGeneratedCaption);
-      timeInput.removeEventListener("input", updateGeneratedCaption);
-      githubInput.removeEventListener("input", updateGeneratedCaption);
-      cancelButton.removeEventListener("click", closeCustomPopup);
-      submitButton.removeEventListener("click", handleSubmit);
+      languageInput.removeEventListener('input', updateGeneratedCaption);
+      titleInput.removeEventListener('input', updateGeneratedCaption);
+      spaceInput.removeEventListener('input', updateGeneratedCaption);
+      timeInput.removeEventListener('input', updateGeneratedCaption);
+      githubInput.removeEventListener('input', updateGeneratedCaption);
+      cancelButton.removeEventListener('click', closeCustomPopup);
+      submitButton.removeEventListener('click', handleSubmit);
 
       // Remove popup
       popupDiv.remove();
@@ -275,7 +275,7 @@ const openCustomPopup = (data: Data): void => {
     }
 
     chrome.runtime.sendMessage({
-      action: "processedData",
+      action: 'processedData',
       data: {
         language: languageInput.value,
         title: titleInput.value,

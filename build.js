@@ -13,8 +13,14 @@ fs.copySync('./src/popup/style.css', './build/popup/style.css');
 fs.copySync('./src/options/index.html', './build/options/index.html');
 fs.copySync('./src/options/style.css', './build/options/style.css');
 fs.copySync('./src/content/style.css', './build/content/style.css');
-fs.copySync('./src/public/bootstrap/bootstrap.bundle.min.js', './build/public/bootstrap/bootstrap.bundle.min.js');
-fs.copySync('./src/public/bootstrap/bootstrap.min.css', './build/public/bootstrap/bootstrap.min.css');
+fs.copySync(
+  './src/public/bootstrap/bootstrap.bundle.min.js',
+  './build/public/bootstrap/bootstrap.bundle.min.js',
+);
+fs.copySync(
+  './src/public/bootstrap/bootstrap.min.css',
+  './build/public/bootstrap/bootstrap.min.css',
+);
 
 // ESBuild build options
 const esbuildOptions = {
@@ -29,11 +35,19 @@ const esbuildOptions = {
 // Build each entry point
 const entryPoints = [
   { name: 'popup', entry: './src/popup/popup.ts', outdir: 'popup' },
-  { name: 'background', entry: './src/script/background.ts', outdir: 'background' },
-  { name: 'lang-detector', entry: './src/script/lang-detector.ts', outdir: 'background' },
+  {
+    name: 'background',
+    entry: './src/script/background.ts',
+    outdir: 'background',
+  },
+  {
+    name: 'lang-detector',
+    entry: './src/script/lang-detector.ts',
+    outdir: 'background',
+  },
   { name: 'base64', entry: './src/script/base64.ts', outdir: 'background' },
   { name: 'content', entry: './src/content/content.ts', outdir: 'content' },
-  { name: 'options', entry: './src/options/options.ts', outdir: 'options' }
+  { name: 'options', entry: './src/options/options.ts', outdir: 'options' },
 ];
 
 entryPoints.forEach(({ name, entry, outdir }) => {

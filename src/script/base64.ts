@@ -1,5 +1,5 @@
 const _alphabet =
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
 const _alphabetIdx = [
   62, -1, -1, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, 64, -1, -1,
   -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
@@ -8,14 +8,14 @@ const _alphabetIdx = [
 ];
 
 export function encode(input: Uint8Array | string): string {
-  if (!(input instanceof Uint8Array || typeof input === "string")) {
+  if (!(input instanceof Uint8Array || typeof input === 'string')) {
     throw new TypeError('"input" be a string or Uint8Array.');
   }
-  if (typeof input === "string") {
+  if (typeof input === 'string') {
     // convert input to Uint8Array
     input = new TextEncoder().encode(input);
   }
-  let output = "";
+  let output = '';
   let chr1;
   let chr2;
   let chr3;
@@ -42,7 +42,7 @@ export function decode(input: string): Uint8Array {
   let length = input.length;
   const mod4 = length % 4;
   if (mod4 === 1) {
-    throw new Error("Illegal base64 string.");
+    throw new Error('Illegal base64 string.');
   }
   let diff = 0;
   if (mod4 > 0) {

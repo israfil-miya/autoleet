@@ -1,4 +1,4 @@
-import _ from "lodash";
+import _ from 'lodash';
 
 interface Checker {
   pattern: RegExp;
@@ -95,7 +95,7 @@ const languages: LanguageCheckers = {
     { pattern: /var( )+\w+( )*=?/, points: -1 },
   ],
 
-  "C++": [
+  'C++': [
     // Primitive variable declaration.
     { pattern: /(char|long|int|float|double)( )+\w+( )*=?/, points: 2 },
     // #include <whatever.h>
@@ -332,7 +332,7 @@ const languages: LanguageCheckers = {
 function getPoints(
   language: string,
   lineOfCode: string,
-  checkers: Checker[]
+  checkers: Checker[],
 ): number {
   return _.reduce(
     _.map(checkers, (checker: Checker) => {
@@ -342,13 +342,13 @@ function getPoints(
       return 0;
     }),
     (memo: number, num: number) => memo + num,
-    0
+    0,
   );
 }
 
 function detectLang(
   snippet: string,
-  options?: DetectLangOptions
+  options?: DetectLangOptions,
 ): string | Statistics {
   const opts = _.defaults(options || {}, {
     heuristic: true,
@@ -356,9 +356,9 @@ function detectLang(
   });
 
   let linesOfCode = snippet
-    .replace(/\r\n?/g, "\n")
-    .replace(/\n{2,}/g, "\n")
-    .split("\n");
+    .replace(/\r\n?/g, '\n')
+    .replace(/\n{2,}/g, '\n')
+    .split('\n');
 
   function nearTop(index: number): boolean {
     if (linesOfCode.length <= 10) {
@@ -386,8 +386,8 @@ function detectLang(
     (pair: { language: string; checkers: Checker[] }) => {
       const { language, checkers } = pair;
 
-      if (language === "Unknown") {
-        return { language: "Unknown", points: 1 };
+      if (language === 'Unknown') {
+        return { language: 'Unknown', points: 1 };
       }
 
       const pointsList = linesOfCode.map((lineOfCode, index) => {
@@ -397,8 +397,8 @@ function detectLang(
             lineOfCode,
             _.reject(
               checkers,
-              (checker) => checker.nearTop !== undefined && checker.nearTop
-            )
+              checker => checker.nearTop !== undefined && checker.nearTop,
+            ),
           );
         } else {
           return getPoints(language, lineOfCode, checkers);
@@ -408,11 +408,11 @@ function detectLang(
       const points: number = _.reduce(
         pointsList,
         (memo: number, num: number) => memo + num,
-        0
+        0,
       );
 
       return { language, points };
-    }
+    },
   );
 
   const bestResult = _.maxBy(results, (result: Result) => result.points);
@@ -424,10 +424,10 @@ function detectLang(
     }
 
     statistics.sort((a, b) => b[1] - a[1]);
-    return { detected: bestResult?.language || "Unknown", statistics };
+    return { detected: bestResult?.language || 'Unknown', statistics };
   }
 
-  return bestResult?.language || "Unknown";
+  return bestResult?.language || 'Unknown';
 }
 
 export default detectLang;

@@ -8,7 +8,8 @@
     "start": "nodemon --watch src --ext ts,tsx,js,mjs,cjs,json,css,html --exec \"npm run build\"",
     "build": "node build.js",
     "clean": "rimraf build",
-    "dev": "npm run clean && npm run build && npm start"
+    "dev": "npm run clean && npm run build && npm start",
+    "format": "prettier --write ."
   },
   "keywords": [
     "chrome-extension",
@@ -29,15 +30,16 @@
     "email": "israfilmiya120@gmail.com"
   },
   "devDependencies": {
-    "@types/lodash": "^4.17.7",
-    "lodash": "^4.17.21",
     "@types/chrome": "^0.0.268",
+    "@types/lodash": "^4.17.7",
     "@types/node": "^20.14.10",
     "esbuild": "^0.20.2",
     "esbuild-plugin-tsc": "^0.4.0",
     "fs-extra": "^11.2.0",
+    "lodash": "^4.17.21",
     "moment-timezone": "^0.5.45",
     "nodemon": "^3.1.0",
+    "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
     "typescript": "^5.5.3"
   }

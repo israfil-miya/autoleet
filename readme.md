@@ -22,17 +22,22 @@ npm run build
 - Select the downloaded `autoleet` folder (root)
 
 ### Configure
+
 #### Professional Mode:
+
 - Open `/src/script/background.ts` file
 - Set the `professionalAccount` variable as `true` if you have professional mode enabled for your Facebook account.
+
 #### Confirmation Before Posting:
+
 - Open `/src/script/background.ts` file
 - Set the `requireConfirmationBeforePosting` variable as `true` if you want a confirmation before clicking the post button.
+
 #### Waiting Time After Confirmation:
+
 - Open `/src/script/background.ts` file
 - Set the wait time in seconds in `countdownAfterConfirmationInSeconds` variable.
 - You can set the variable to `0` for no waiting.
-
 
 ### Usage
 
@@ -52,11 +57,11 @@ npm run build
   <img src="https://i.ibb.co/DQRTRpM/step-5.png" alt="step-5" width="80%" height="auto">
   <p style="font-size: 0.9rem"><b>Note:</b> Language, Title & Caption is auto generated but it's editable</p>
 
-
 ### Flow
+
 - The extension opens [ray.so](https://ray.so/), generates the code block image, and downloads it automatically.
 - After download, it opens [facebook.com](https://www.facebook.com/) and fills in the caption & image for a post (confirmation for professional accounts).
 
 ### Notes
-- Ensure you're logged in to Facebook before using the extension.
 
+- Ensure you're logged in to Facebook before using the extension.
