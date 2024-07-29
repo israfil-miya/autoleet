@@ -1,9 +1,9 @@
 <h1 style="text-align: center;">AutoLeet</h1>
-<small style="display: flex; justify-content: center">An open source chrome extension that takes your code and shares on preferred social media</small>
+<small style="display: flex; justify-content: center">An open source chrome extension that takes your code, creates a beautiful image from your code snippet and posts on facebook</small>
 
-### Installation
+### Installation (Debian Linux)
 
-```bash
+```sh
 sudo apt install git -y
 git clone https://github.com/israfil-miya/autoleet.git
 cd autoleet
@@ -20,6 +20,19 @@ npm run build
 - Enable the `Developer mode` toggle
 - Click on `Load unpacked`
 - Select the downloaded `autoleet` folder (root)
+
+### Congure
+#### Professional Mode:
+- Open `/src/script/background.ts` file
+- Set the `professionalAccount` variable as `true` if you have professional mode enabled for your Facebook account.
+#### Confirmation Before Posting:
+- Open /src/script/background.ts file
+- Set the `requireConfirmationBeforePosting` variable as true if you want a confirmation before clicking the post button.
+#### Waiting Time After Confirmation:
+- Open `/src/script/background.ts` file
+- Set the wait time in seconds in `countdownAfterConfirmationInSeconds` variable.
+- You can set the variable to `0` for no waiting.
+
 
 ### Usage
 
@@ -39,8 +52,11 @@ npm run build
   <img src="https://i.ibb.co/DQRTRpM/step-5.png" alt="step-5" width="80%" height="auto">
   <p style="font-size: 0.9rem"><b>Note:</b> Language, Title & Caption is auto generated but it's editable</p>
 
-<br/>
 
-> The extension will open `ray.so` website in a new tab, generate the code block image from the selected text/code and then download it automatically. When the download finishes the extension will open `facebook.com` in a new tab and you will be redirected to that tab. The extension will then automatically trigger the facebook's `Create Post` popup and fill-in Caption & Image and then post it.
+### Flow
+- The extension opens [ray.so](https://ray.so/), generates the code block image, and downloads it automatically.
+- After download, it opens [facebook.com](https://www.facebook.com/) and fills in the caption & image for a post (confirmation for professional accounts).
 
-> _Make sure you are logged in to `facebook.com` before using the extension_
+### Notes
+- Ensure you're logged in to Facebook before using the extension.
+
