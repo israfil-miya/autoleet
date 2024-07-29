@@ -7,4 +7,8 @@
 # ignore all dotted files
 /**/.*  
 /**/.*/
+
+# allow these dotted files only
 !/.gitignore 
+!/.prettierignore
+!/.prettierrc
