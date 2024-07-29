@@ -21,7 +21,7 @@ npm run build
 - Click on `Load unpacked`
 - Select the downloaded `autoleet` folder (root)
 
-### Congure
+### Configure
 #### Professional Mode:
 - Open `/src/script/background.ts` file
 - Set the `professionalAccount` variable as `true` if you have professional mode enabled for your Facebook account.
