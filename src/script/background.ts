@@ -172,31 +172,41 @@ function facebookAutoPostScript(
       return;
     }
 
+
     console.log("Post button found, waiting for it to be clickable");
 
     waitForClickable(postButton, () => {
-      if (requireConfirmationBeforePosting) {
+      const handlePost = () => {
+        // Countdown logic
         let countdown = countdownInSeconds;
-
-        const userCancelled = !confirm(
-          `Click "OK" to post in ${countdown} seconds, or click "Cancel" to abort.`
-        );
         const intervalId = setInterval(() => {
-          if (countdown === 0) {
+          if (countdown <= 0) {
             clearInterval(intervalId);
             clickOnDiv(postButton);
           } else {
-            if (userCancelled) {
-              clearInterval(intervalId);
-              location.reload();
-            }
+            countdown--;
           }
-          countdown--;
         }, 1000);
-      } else {
-        clickOnDiv(postButton);
+      };
+    
+      if (requireConfirmationBeforePosting) {
+        // Prompt user for confirmation
+        const userConfirmed = confirm(
+          `Click "OK" to post in ${countdownInSeconds} seconds, or click "Cancel" to abort.`
+        );
+    
+        if (!userConfirmed) {
+          console.log("User cancelled the post");
+          location.reload();
+          return; // Exit if user cancels
+        }
+    
+        console.log("User confirmed the post");
       }
+    
+      handlePost(); // Proceed with countdown and clicking the button
     });
+
   }
 
   // for professional account
