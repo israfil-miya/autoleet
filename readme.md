@@ -26,8 +26,8 @@ npm run build
 - Open `/src/script/background.ts` file
 - Set the `professionalAccount` variable as `true` if you have professional mode enabled for your Facebook account.
 #### Confirmation Before Posting:
-- Open /src/script/background.ts file
-- Set the `requireConfirmationBeforePosting` variable as true if you want a confirmation before clicking the post button.
+- Open `/src/script/background.t`s file
+- Set the `requireConfirmationBeforePosting` variable as `true` if you want a confirmation before clicking the post button.
 #### Waiting Time After Confirmation:
 - Open `/src/script/background.ts` file
 - Set the wait time in seconds in `countdownAfterConfirmationInSeconds` variable.
