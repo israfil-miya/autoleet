@@ -68,3 +68,4 @@ npm run build
 ### Notes
 
 - Ensure you're logged in to Facebook before using the extension.
+- If you don't get the popup when clicking `Share to social media`, refresh the page and try again.
