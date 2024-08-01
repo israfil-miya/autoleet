@@ -65,7 +65,7 @@ npm run build
 - The extension opens [ray.so](https://ray.so/), generates the code block image, and downloads it automatically.
 - After download, it opens [facebook.com](https://www.facebook.com/), fills in the caption and image, and posts.
 
-### Notes
+### Note
 
 - Ensure you're logged in to Facebook before using the extension.
 - If you don't get the popup when clicking `Share to social media`, refresh the page and try again.
