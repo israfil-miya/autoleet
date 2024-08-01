@@ -4,11 +4,11 @@
 ### Installation (Debian Linux)
 
 ```sh
-sudo apt install git -y
+sudo apt-get install -y git 
 git clone https://github.com/israfil-miya/autoleet.git
 cd autoleet
-sudo apt install nodejs -y
-sudo apt install npm -y
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -
+sudo apt-get install -y nodejs
 npm i
 npm run build
 ```
