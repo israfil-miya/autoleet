@@ -7,9 +7,9 @@
 sudo apt-get install -y git 
 git clone https://github.com/israfil-miya/autoleet.git
 cd autoleet
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash -
+curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -y nodejs
-npm i
+npm install
 npm run build
 ```
 
