@@ -54,7 +54,6 @@ npm run build
   <img src="https://i.ibb.co/Vtxstfv/step-3.png" alt="step-3" width="80%" height="auto">
 
 - Right click on the selection and choose `Share to social media`
-  <img src="https://i.ibb.co/rvpKv4m/step-4.png" alt="step-4" width="80%" height="auto">
 
 - Fill-up the form in the popup and click the `Submit` button
   <img src="https://i.ibb.co/DQRTRpM/step-5.png" alt="step-5" width="80%" height="auto">
